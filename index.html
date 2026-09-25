@@ -1,0 +1,2488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>DMC Apps Store - Powered by Hitu Sir</title>
+    <meta name="description" content="Download premium apps for free. Powered by Hitu Sir.">
+    
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary: #4fc3f7;
+            --primary-dark: #29b6f6;
+            --primary-gradient: linear-gradient(135deg, #4fc3f7 0%, #29b6f6 100%);
+            --dark: #1a2332;
+            --darker: #141b26;
+            --text: #2c3e50;
+            --muted: #7f8c9d;
+            --border: #e8edf2;
+            --bg: #f5f7fa;
+        }
+
+        body {
+            background: var(--bg);
+            min-height: 100vh;
+            color: var(--text);
+            position: relative;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ===== WATERMARK ===== */
+        .watermark {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-25deg);
+            font-size: 120px;
+            font-weight: 900;
+            color: rgba(26, 35, 50, 0.035);
+            white-space: nowrap;
+            pointer-events: none;
+            z-index: 0;
+            letter-spacing: 8px;
+            text-transform: uppercase;
+            user-select: none;
+        }
+
+        .watermark::after {
+            content: 'DMC • HITU SIR';
+            display: block;
+            font-size: 40px;
+            margin-top: 20px;
+            letter-spacing: 20px;
+            color: rgba(26, 35, 50, 0.025);
+        }
+
+        .watermark-corner {
+            position: fixed;
+            font-size: 14px;
+            font-weight: 700;
+            color: rgba(79, 195, 247, 0.12);
+            z-index: 0;
+            pointer-events: none;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        .watermark-corner.top-left {
+            top: 90px;
+            left: 20px;
+            transform: rotate(-90deg);
+            transform-origin: left top;
+        }
+
+        .watermark-corner.bottom-right {
+            bottom: 20px;
+            right: 20px;
+        }
+
+        .content-wrapper {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ===== HEADER ===== */
+        .header {
+            background: linear-gradient(135deg, #1a2332 0%, #2c3e50 100%);
+            color: #fff;
+            padding: 14px 0;
+            box-shadow: 0 4px 30px rgba(0,0,0,0.2);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+
+        .header-content {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 0 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            cursor: pointer;
+        }
+
+        .dmc-logo {
+            width: 56px;
+            height: 56px;
+            border-radius: 14px;
+            background: var(--primary-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 20px rgba(79,195,247,0.5);
+            flex-shrink: 0;
+            border: 2px solid rgba(255,255,255,0.2);
+            overflow: hidden;
+            transition: transform 0.3s;
+        }
+
+        .dmc-logo:hover { transform: scale(1.05); }
+
+        .dmc-logo img,
+        .dmc-logo svg {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .logo-text h1 {
+            font-size: 21px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            background: linear-gradient(135deg, #fff 0%, #4fc3f7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .logo-text p {
+            font-size: 11px;
+            color: var(--primary);
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+        }
+
+        .logo-text .powered {
+            font-size: 10px;
+            color: #8899aa;
+            letter-spacing: 1.5px;
+            margin-top: 2px;
+        }
+
+        .search-container {
+            flex: 1;
+            max-width: 500px;
+            min-width: 200px;
+            position: relative;
+        }
+
+        .search-container input {
+            width: 100%;
+            padding: 13px 20px 13px 46px;
+            border: 2px solid transparent;
+            border-radius: 30px;
+            background: rgba(255,255,255,0.08);
+            color: #fff;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .search-container input::placeholder { color: #8899aa; }
+
+        .search-container input:focus {
+            outline: none;
+            background: rgba(255,255,255,0.15);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(79,195,247,0.15);
+        }
+
+        .search-container i {
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--primary);
+        }
+
+        .header-stats {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .header-stat {
+            text-align: center;
+            padding: 6px 14px;
+            background: rgba(79,195,247,0.08);
+            border-radius: 12px;
+            border: 1px solid rgba(79,195,247,0.15);
+        }
+
+        .header-stat .num {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--primary);
+            line-height: 1;
+        }
+
+        .header-stat .label {
+            font-size: 10px;
+            color: #8899aa;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-top: 3px;
+        }
+
+        /* ===== HERO ===== */
+        .hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            padding: 60px 24px 80px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: 'HITU SIR';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 180px;
+            font-weight: 900;
+            color: rgba(255,255,255,0.045);
+            white-space: nowrap;
+            pointer-events: none;
+            letter-spacing: 15px;
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 100px;
+            background: linear-gradient(to top, var(--bg), transparent);
+        }
+
+        .hero h2 {
+            font-size: 36px;
+            margin-bottom: 14px;
+            font-weight: 800;
+            position: relative;
+            z-index: 1;
+            letter-spacing: -0.5px;
+        }
+
+        .hero p {
+            font-size: 16px;
+            opacity: 0.92;
+            max-width: 620px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+            line-height: 1.6;
+        }
+
+        .hero .brand-line {
+            margin-top: 20px;
+            font-size: 12px;
+            letter-spacing: 4px;
+            font-weight: 700;
+            color: #ffd700;
+            position: relative;
+            z-index: 1;
+            text-transform: uppercase;
+        }
+
+        /* ===== SLOGAN BANNER ===== */
+        .slogan-banner {
+            max-width: 1300px;
+            margin: -50px auto 24px;
+            padding: 0 24px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .slogan-card {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 24px 30px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+            border: 2px solid rgba(79, 195, 247, 0.25);
+            display: flex;
+            align-items: center;
+            gap: 22px;
+            overflow: hidden;
+            position: relative;
+            transition: all 0.4s ease;
+        }
+
+        .slogan-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+            background: linear-gradient(180deg, #4fc3f7 0%, #29b6f6 100%);
+        }
+
+        .slogan-card::after {
+            content: '💡';
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 90px;
+            opacity: 0.06;
+            pointer-events: none;
+        }
+
+        .slogan-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, #4fc3f7 0%, #29b6f6 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            color: #fff;
+            box-shadow: 0 8px 20px rgba(79, 195, 247, 0.4);
+            flex-shrink: 0;
+            animation: iconPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes iconPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+        }
+
+        .slogan-content {
+            flex: 1;
+            min-width: 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .slogan-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 10px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ffd700 0%, #ff9800 100%);
+            color: #fff;
+            padding: 4px 12px;
+            border-radius: 20px;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            box-shadow: 0 4px 12px rgba(255, 152, 0, 0.3);
+        }
+
+        .slogan-text {
+            font-size: 18px;
+            font-weight: 800;
+            color: #1a2332;
+            line-height: 1.5;
+            margin-bottom: 6px;
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+
+        .slogan-subtext {
+            font-size: 14px;
+            font-weight: 500;
+            color: #7f8c9d;
+            line-height: 1.4;
+            font-style: italic;
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+
+        .slogan-author {
+            font-size: 11px;
+            font-weight: 700;
+            color: #4fc3f7;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            margin-top: 10px;
+            transition: opacity 0.4s ease;
+        }
+
+        .slogan-dots {
+            display: flex;
+            gap: 6px;
+            margin-top: 14px;
+        }
+
+        .slogan-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #dce1e8;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .slogan-dot.active {
+            width: 24px;
+            border-radius: 4px;
+            background: linear-gradient(90deg, #4fc3f7 0%, #29b6f6 100%);
+        }
+
+        .slogan-fade-out {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+
+        /* ===== CATEGORIES ===== */
+        .categories {
+            max-width: 1300px;
+            margin: 0 auto 20px;
+            padding: 0 24px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .category-btn {
+            padding: 10px 22px;
+            background: #fff;
+            border: 2px solid var(--border);
+            border-radius: 30px;
+            font-size: 13px;
+            font-weight: 700;
+            color: #555;
+            cursor: pointer;
+            transition: all 0.25s;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+
+        .category-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(79,195,247,0.25);
+        }
+
+        .category-btn.active {
+            background: var(--primary-gradient);
+            color: #fff;
+            border-color: transparent;
+            box-shadow: 0 8px 20px rgba(79,195,247,0.4);
+        }
+
+        /* ===== APPS GRID ===== */
+        .apps-container {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .apps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 24px;
+        }
+
+        /* ===== APP CARD ===== */
+        .app-card {
+            background: #fff;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid transparent;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            cursor: pointer;
+        }
+
+        .app-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            border-color: var(--primary);
+        }
+
+        /* Screenshot Section - 16:9 */
+        .app-screenshot {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            background: linear-gradient(135deg, #f0f2f5 0%, #e1e5eb 100%);
+            position: relative;
+            overflow: hidden;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .app-screenshot img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background: #f0f2f5;
+            display: block;
+            transition: transform 0.5s ease;
+        }
+
+        .app-card:hover .app-screenshot img {
+            transform: scale(1.08);
+        }
+
+        .app-screenshot::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(180deg, transparent 60%, rgba(0,0,0,0.35) 100%);
+            pointer-events: none;
+        }
+
+        .app-screenshot-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #4fc3f7 0%, #29b6f6 100%);
+            color: #fff;
+            gap: 10px;
+            position: relative;
+        }
+
+        .app-screenshot-placeholder::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.15) 0%, transparent 60%);
+        }
+
+        .app-screenshot-placeholder i {
+            font-size: 52px;
+            opacity: 0.95;
+            z-index: 1;
+        }
+
+        .app-screenshot-placeholder span {
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 2.5px;
+            opacity: 0.95;
+            z-index: 1;
+            text-transform: uppercase;
+        }
+
+        .app-screenshot-badge {
+            position: absolute;
+            top: 14px;
+            left: 14px;
+            background: rgba(26, 35, 50, 0.85);
+            color: #fff;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            backdrop-filter: blur(8px);
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .app-screenshot-badge i {
+            font-size: 10px;
+            color: var(--primary);
+        }
+
+        .app-screenshot-dmc {
+            position: absolute;
+            bottom: 12px;
+            right: 14px;
+            font-size: 12px;
+            font-weight: 900;
+            color: rgba(255,255,255,0.55);
+            letter-spacing: 2.5px;
+            pointer-events: none;
+            z-index: 2;
+            text-shadow: 0 2px 6px rgba(0,0,0,0.5);
+        }
+
+        /* App Body */
+        .app-body {
+            padding: 20px 22px 0 22px;
+            flex: 1;
+        }
+
+        .app-header {
+            display: flex;
+            gap: 14px;
+            margin-bottom: 14px;
+            align-items: center;
+        }
+
+        .app-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 16px;
+            object-fit: cover;
+            background: #f0f2f5;
+            flex-shrink: 0;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+            border: 2px solid #fff;
+        }
+
+        .app-icon-placeholder {
+            width: 60px;
+            height: 60px;
+            border-radius: 16px;
+            background: var(--primary-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            color: #fff;
+            flex-shrink: 0;
+            box-shadow: 0 6px 16px rgba(79,195,247,0.35);
+            border: 2px solid #fff;
+        }
+
+        .app-title-section {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .app-name {
+            font-size: 17px;
+            font-weight: 800;
+            color: var(--dark);
+            margin-bottom: 8px;
+            word-break: break-word;
+            line-height: 1.3;
+        }
+
+        .app-meta {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .app-badge {
+            font-size: 10.5px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .badge-version {
+            background: #e3f2fd;
+            color: #1565c0;
+        }
+
+        .badge-category {
+            background: #f3e5f5;
+            color: #7b1fa2;
+        }
+
+        .badge-size {
+            background: #fff3e0;
+            color: #e65100;
+        }
+
+        .app-description {
+            color: #666;
+            font-size: 13px;
+            line-height: 1.6;
+            margin-bottom: 16px;
+            min-height: 42px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .app-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 22px 18px 22px;
+            border-top: 1px solid var(--border);
+            gap: 12px;
+            background: #fafbfc;
+        }
+
+        .download-count {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 12px;
+            color: #888;
+            font-weight: 600;
+        }
+
+        .download-count i {
+            color: #27ae60;
+            font-size: 13px;
+        }
+
+        .download-btn {
+            background: var(--primary-gradient);
+            color: #fff;
+            border: none;
+            padding: 11px 22px;
+            border-radius: 25px;
+            font-size: 13px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.25s;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            text-decoration: none;
+            box-shadow: 0 6px 16px rgba(79,195,247,0.35);
+            letter-spacing: 0.3px;
+        }
+
+        .download-btn:hover {
+            transform: translateY(-2px) scale(1.03);
+            box-shadow: 0 10px 24px rgba(79,195,247,0.55);
+        }
+
+        .download-btn:active {
+            transform: translateY(0) scale(0.98);
+        }
+
+        /* ===== LOADER & EMPTY ===== */
+        .loader-container {
+            text-align: center;
+            padding: 100px 20px;
+            color: #888;
+        }
+
+        .loader-container i {
+            font-size: 42px;
+            color: var(--primary);
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            100% { transform: rotate(360deg); }
+        }
+
+        .loader-container p {
+            margin-top: 16px;
+            font-size: 15px;
+            font-weight: 500;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 100px 20px;
+        }
+
+        .empty-state i {
+            font-size: 68px;
+            color: #dce1e8;
+            margin-bottom: 20px;
+        }
+
+        .empty-state h3 {
+            color: var(--dark);
+            font-size: 22px;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .empty-state p {
+            color: #888;
+            font-size: 14px;
+        }
+
+        /* ===== WHATSAPP FLOAT ===== */
+        .whatsapp-float {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+            color: #fff;
+            width: 62px;
+            height: 62px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            box-shadow: 0 8px 24px rgba(37, 211, 102, 0.5);
+            cursor: pointer;
+            transition: all 0.3s;
+            z-index: 9999;
+            text-decoration: none;
+            animation: whatsappPulse 2s infinite;
+        }
+
+        .whatsapp-float:hover {
+            transform: scale(1.12) rotate(5deg);
+            box-shadow: 0 12px 32px rgba(37, 211, 102, 0.7);
+        }
+
+        .whatsapp-float .tooltip {
+            position: absolute;
+            right: 78px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--dark);
+            color: #fff;
+            padding: 10px 16px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: 0.3s;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+        }
+
+        .whatsapp-float .tooltip::after {
+            content: '';
+            position: absolute;
+            left: 100%;
+            top: 50%;
+            transform: translateY(-50%);
+            border: 6px solid transparent;
+            border-left-color: var(--dark);
+        }
+
+        .whatsapp-float:hover .tooltip {
+            opacity: 1;
+            right: 84px;
+        }
+
+        @keyframes whatsappPulse {
+            0% { box-shadow: 0 8px 24px rgba(37, 211, 102, 0.5), 0 0 0 0 rgba(37, 211, 102, 0.7); }
+            70% { box-shadow: 0 8px 24px rgba(37, 211, 102, 0.5), 0 0 0 22px rgba(37, 211, 102, 0); }
+            100% { box-shadow: 0 8px 24px rgba(37, 211, 102, 0.5), 0 0 0 0 rgba(37, 211, 102, 0); }
+        }
+
+        /* ===== FOOTER ===== */
+        .footer {
+            background: linear-gradient(135deg, #1a2332 0%, #2c3e50 100%);
+            color: #8899aa;
+            padding: 50px 24px 24px;
+            margin-top: 80px;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        .footer::before {
+            content: 'DMC';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 200px;
+            font-weight: 900;
+            color: rgba(79,195,247,0.03);
+            pointer-events: none;
+            letter-spacing: 20px;
+        }
+
+        .footer-content {
+            max-width: 1300px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .footer h3 {
+            color: #fff;
+            margin-bottom: 10px;
+            font-size: 20px;
+            font-weight: 800;
+        }
+
+        .footer .brand-signature {
+            display: inline-block;
+            margin: 20px 0;
+            padding: 14px 32px;
+            background: linear-gradient(135deg, rgba(79,195,247,0.15) 0%, rgba(41,182,246,0.15) 100%);
+            border: 2px solid rgba(79,195,247,0.35);
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: 800;
+            color: var(--primary);
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            box-shadow: 0 8px 24px rgba(79,195,247,0.15);
+        }
+
+        .footer .brand-signature i {
+            color: #ffd700;
+            margin-right: 8px;
+        }
+
+        .footer-contact {
+            margin-top: 24px;
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .footer-contact a {
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.25s;
+            padding: 10px 20px;
+            border-radius: 25px;
+            background: rgba(79,195,247,0.1);
+            border: 1px solid rgba(79,195,247,0.2);
+        }
+
+        .footer-contact a:hover {
+            background: rgba(79,195,247,0.2);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(79,195,247,0.25);
+        }
+
+        .footer-copy {
+            padding-top: 24px;
+            margin-top: 24px;
+            border-top: 1px solid #2a3a4a;
+            font-size: 13px;
+            color: #6c7a89;
+        }
+
+        .footer-copy .hitu {
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        /* ===== TOAST ===== */
+        .toast {
+            position: fixed;
+            bottom: 100px;
+            right: 30px;
+            background: var(--dark);
+            color: #fff;
+            padding: 14px 24px;
+            border-radius: 12px;
+            box-shadow: 0 12px 32px rgba(0,0,0,0.25);
+            opacity: 0;
+            transform: translateY(20px);
+            transition: 0.3s;
+            z-index: 99999;
+            max-width: 400px;
+            border-left: 5px solid var(--primary);
+            font-weight: 600;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .toast.success { border-left-color: #27ae60; }
+        .toast.error { border-left-color: #e74c3c; }
+
+        /* ============================================================ */
+        /* ===== APP DETAIL MODAL ===== */
+        /* ============================================================ */
+        .app-detail-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 15, 25, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 99998;
+            display: none;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 40px 20px;
+            overflow-y: auto;
+            animation: fadeIn 0.25s ease;
+        }
+
+        .app-detail-overlay.show {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .app-detail-container {
+            background: #fff;
+            border-radius: 24px;
+            max-width: 900px;
+            width: 100%;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+            position: relative;
+            overflow: hidden;
+            animation: slideUpDetail 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            margin: auto;
+        }
+
+        @keyframes slideUpDetail {
+            from { transform: translateY(40px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* Close Button */
+        .app-detail-close {
+            position: absolute;
+            top: 18px;
+            right: 18px;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: rgba(26, 35, 50, 0.9);
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            transition: all 0.25s;
+            backdrop-filter: blur(8px);
+        }
+
+        .app-detail-close:hover {
+            background: #e74c3c;
+            transform: rotate(90deg) scale(1.1);
+        }
+
+        /* Detail Screenshot Section */
+        .app-detail-screenshot {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            background: linear-gradient(135deg, #f0f2f5 0%, #e1e5eb 100%);
+            position: relative;
+            overflow: hidden;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .app-detail-screenshot img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background: #f0f2f5;
+            display: block;
+        }
+
+        .app-detail-screenshot .app-screenshot-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #4fc3f7 0%, #29b6f6 100%);
+            color: #fff;
+            gap: 12px;
+        }
+
+        .app-detail-screenshot .app-screenshot-placeholder i {
+            font-size: 72px;
+            opacity: 0.95;
+        }
+
+        .app-detail-screenshot .app-screenshot-placeholder span {
+            font-size: 14px;
+            font-weight: 800;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        .app-detail-preview-badge {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            background: rgba(26, 35, 50, 0.9);
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            backdrop-filter: blur(8px);
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .app-detail-preview-badge i {
+            color: var(--primary);
+            font-size: 12px;
+        }
+
+        .app-detail-dmc {
+            position: absolute;
+            bottom: 14px;
+            right: 18px;
+            font-size: 14px;
+            font-weight: 900;
+            color: rgba(255,255,255,0.6);
+            letter-spacing: 3px;
+            pointer-events: none;
+            z-index: 2;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+        }
+
+        /* Detail Content Section */
+        .app-detail-content {
+            padding: 32px 36px 36px 36px;
+        }
+
+        .app-detail-header {
+            display: flex;
+            gap: 18px;
+            align-items: center;
+            margin-bottom: 22px;
+            padding-bottom: 22px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .app-detail-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 20px;
+            object-fit: cover;
+            background: #f0f2f5;
+            flex-shrink: 0;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            border: 3px solid #fff;
+        }
+
+        .app-detail-icon-placeholder {
+            width: 80px;
+            height: 80px;
+            border-radius: 20px;
+            background: var(--primary-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 38px;
+            color: #fff;
+            flex-shrink: 0;
+            box-shadow: 0 8px 24px rgba(79,195,247,0.4);
+            border: 3px solid #fff;
+        }
+
+        .app-detail-title-section {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .app-detail-name {
+            font-size: 26px;
+            font-weight: 800;
+            color: var(--dark);
+            margin-bottom: 12px;
+            line-height: 1.3;
+            word-break: break-word;
+        }
+
+        .app-detail-meta {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .app-detail-meta .app-badge {
+            font-size: 12px;
+            padding: 6px 14px;
+        }
+
+        /* Detail Stats Grid */
+        .app-detail-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .app-detail-stat {
+            background: #f8fafc;
+            border-radius: 14px;
+            padding: 16px;
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.25s;
+        }
+
+        .app-detail-stat:hover {
+            transform: translateY(-2px);
+            border-color: var(--primary);
+            box-shadow: 0 6px 16px rgba(79,195,247,0.15);
+        }
+
+        .app-detail-stat-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background: var(--primary-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 18px;
+            flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(79,195,247,0.3);
+        }
+
+        .app-detail-stat-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .app-detail-stat-label {
+            font-size: 10px;
+            color: #888;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 3px;
+        }
+
+        .app-detail-stat-value {
+            font-size: 15px;
+            font-weight: 800;
+            color: var(--dark);
+            word-break: break-word;
+        }
+
+        /* Description Section */
+        .app-detail-section-title {
+            font-size: 14px;
+            font-weight: 800;
+            color: var(--dark);
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .app-detail-section-title::before {
+            content: '';
+            width: 4px;
+            height: 16px;
+            background: var(--primary-gradient);
+            border-radius: 2px;
+        }
+
+        .app-detail-description {
+            color: #555;
+            font-size: 15px;
+            line-height: 1.8;
+            margin-bottom: 24px;
+            padding: 20px 22px;
+            background: #f8fafc;
+            border-radius: 14px;
+            border-left: 4px solid var(--primary);
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        /* Detail Actions */
+        .app-detail-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            padding-top: 24px;
+            border-top: 2px solid var(--border);
+        }
+
+        .app-detail-download-btn {
+            flex: 1;
+            min-width: 200px;
+            background: var(--primary-gradient);
+            color: #fff;
+            border: none;
+            padding: 18px 28px;
+            border-radius: 16px;
+            font-size: 16px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.25s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            text-decoration: none;
+            box-shadow: 0 8px 24px rgba(79,195,247,0.4);
+            letter-spacing: 0.5px;
+        }
+
+        .app-detail-download-btn:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 14px 32px rgba(79,195,247,0.6);
+        }
+
+        .app-detail-download-btn:active {
+            transform: translateY(-1px) scale(0.99);
+        }
+
+        .app-detail-download-btn i {
+            font-size: 18px;
+        }
+
+        .app-detail-share-btn {
+            background: #f0f4f8;
+            color: var(--dark);
+            border: 2px solid var(--border);
+            padding: 18px 24px;
+            border-radius: 16px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.25s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .app-detail-share-btn:hover {
+            background: #e3ecf5;
+            border-color: var(--primary);
+            color: var(--primary);
+            transform: translateY(-3px);
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 900px) {
+            .apps-grid {
+                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .search-container {
+                max-width: 100%;
+            }
+            .header-stats {
+                justify-content: center;
+            }
+            .hero {
+                padding: 45px 20px 65px;
+            }
+            .hero h2 {
+                font-size: 24px;
+            }
+            .hero p {
+                font-size: 13px;
+            }
+            .hero::before {
+                font-size: 90px;
+            }
+            .apps-grid {
+                grid-template-columns: 1fr;
+            }
+            .watermark {
+                font-size: 60px;
+            }
+            .watermark::after {
+                font-size: 18px;
+                letter-spacing: 8px;
+            }
+            .dmc-logo {
+                width: 50px;
+                height: 50px;
+            }
+            .logo-text h1 {
+                font-size: 17px;
+            }
+            .whatsapp-float {
+                width: 56px;
+                height: 56px;
+                font-size: 26px;
+                bottom: 20px;
+                right: 20px;
+            }
+            .toast {
+                right: 16px;
+                left: 16px;
+                bottom: 90px;
+            }
+            .slogan-banner {
+                margin: -40px auto 20px;
+            }
+            .slogan-card {
+                padding: 18px 22px;
+                gap: 16px;
+            }
+            .slogan-icon {
+                width: 50px;
+                height: 50px;
+                font-size: 22px;
+            }
+            .slogan-text {
+                font-size: 15px;
+            }
+            .slogan-subtext {
+                font-size: 12px;
+            }
+            .slogan-card::after {
+                font-size: 60px;
+            }
+            /* Detail Modal Mobile */
+            .app-detail-overlay {
+                padding: 16px;
+            }
+            .app-detail-content {
+                padding: 24px 20px 24px 20px;
+            }
+            .app-detail-header {
+                flex-direction: column;
+                text-align: center;
+                gap: 14px;
+            }
+            .app-detail-name {
+                font-size: 20px;
+            }
+            .app-detail-meta {
+                justify-content: center;
+            }
+            .app-detail-icon,
+            .app-detail-icon-placeholder {
+                width: 70px;
+                height: 70px;
+                font-size: 32px;
+            }
+            .app-detail-actions {
+                flex-direction: column;
+            }
+            .app-detail-download-btn,
+            .app-detail-share-btn {
+                width: 100%;
+            }
+            .app-detail-stats {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero h2 { font-size: 20px; }
+            .app-body { padding: 16px 18px 0 18px; }
+            .app-footer {
+                flex-direction: column;
+                padding: 14px 18px 18px 18px;
+            }
+            .download-btn {
+                width: 100%;
+                justify-content: center;
+            }
+            .app-name { font-size: 15px; }
+            .app-icon, .app-icon-placeholder {
+                width: 54px;
+                height: 54px;
+                font-size: 24px;
+            }
+            .slogan-card {
+                flex-direction: column;
+                text-align: center;
+                gap: 12px;
+                padding: 20px 18px;
+            }
+            .slogan-text {
+                font-size: 14px;
+            }
+            .slogan-subtext {
+                font-size: 11px;
+            }
+            .slogan-dots {
+                justify-content: center;
+            }
+            .app-detail-stats {
+                grid-template-columns: 1fr;
+            }
+            .app-detail-name {
+                font-size: 18px;
+            }
+            .app-detail-description {
+                font-size: 14px;
+                padding: 16px 18px;
+            }
+            .app-detail-content {
+                padding: 20px 16px 20px 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== WATERMARKS ===== -->
+    <div class="watermark" id="watermarkEl">DMC</div>
+    <div class="watermark-corner top-left" id="watermarkCornerLeft">HITU SIR</div>
+    <div class="watermark-corner bottom-right" id="watermarkCornerRight">DMC • POWERED BY HITU SIR</div>
+
+    <!-- ===== CONTENT WRAPPER ===== -->
+    <div class="content-wrapper">
+
+        <!-- HEADER -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <div class="dmc-logo" id="dmcLogo">
+                        <svg id="dmcLogoSvg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="5" y="5" width="90" height="90" rx="20" fill="#ffffff"/>
+                            <rect x="5" y="5" width="90" height="90" rx="20" fill="none" stroke="#4fc3f7" stroke-width="3"/>
+                            <rect x="12" y="12" width="76" height="76" rx="14" fill="none" stroke="#29b6f6" stroke-width="1.5" stroke-dasharray="4 3"/>
+                            <text x="50" y="48" font-family="Arial Black, Arial, sans-serif" font-size="26" font-weight="900" 
+                                  fill="#1976d2" text-anchor="middle" letter-spacing="1">DMC</text>
+                            <line x1="22" y1="55" x2="78" y2="55" stroke="#4fc3f7" stroke-width="1.5"/>
+                            <text x="50" y="67" font-family="Arial, sans-serif" font-size="8.5" font-weight="700" 
+                                  fill="#29b6f6" text-anchor="middle" letter-spacing="1.5">MOBILE</text>
+                            <text x="50" y="80" font-family="Arial, sans-serif" font-size="8.5" font-weight="700" 
+                                  fill="#29b6f6" text-anchor="middle" letter-spacing="1.5">REPAIRING</text>
+                        </svg>
+                        <img id="dmcLogoImg" src="" alt="DMC Logo" style="display:none;">
+                    </div>
+                    <div class="logo-text">
+                        <h1 id="siteTitle">DMC Apps Store</h1>
+                        <p id="siteTagline">Download All Apps Free</p>
+                        <div class="powered" id="sitePowered">⚡ POWERED BY HITU SIR</div>
+                    </div>
+                </div>
+
+                <div class="search-container">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="Search apps by name, category..." onkeyup="filterApps()">
+                </div>
+
+                <div class="header-stats">
+                    <div class="header-stat">
+                        <div class="num" id="totalAppsCount">0</div>
+                        <div class="label">Apps</div>
+                    </div>
+                    <div class="header-stat">
+                        <div class="num" id="totalDownloadsCount">0</div>
+                        <div class="label">Downloads</div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- HERO -->
+        <section class="hero">
+            <h2 id="heroHeading">🚀 Download Premium Apps</h2>
+            <p id="heroSubtitle">All apps are verified, safe and 100% free. Click download and install directly on your device.</p>
+            <div class="brand-line" id="brandLine">✨ A DMC INITIATIVE • POWERED BY HITU SIR ✨</div>
+        </section>
+
+        <!-- ===== MOTIVATIONAL SLOGAN BANNER ===== -->
+        <div class="slogan-banner">
+            <div class="slogan-card" id="sloganCard">
+                <div class="slogan-icon" id="sloganIcon">💪</div>
+                <div class="slogan-content">
+                    <div class="slogan-badge">
+                        <i class="fas fa-star"></i> Daily Motivation
+                    </div>
+                    <div class="slogan-text" id="sloganText">मेहनत करने वालों की कभी हार नहीं होती</div>
+                    <div class="slogan-subtext" id="sloganSubtext">Those who work hard, never lose</div>
+                    <div class="slogan-author" id="sloganAuthor">— Hitu Sir</div>
+                    <div class="slogan-dots" id="sloganDots"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CATEGORIES -->
+        <div class="categories" id="categoriesContainer">
+            <button class="category-btn active" onclick="filterByCategory('All', this)">🎯 All Apps</button>
+        </div>
+
+        <!-- APPS -->
+        <div class="apps-container">
+            <div class="loader-container" id="loader">
+                <i class="fas fa-spinner"></i>
+                <p>Loading apps...</p>
+            </div>
+
+            <div class="apps-grid" id="appsGrid" style="display:none;"></div>
+
+            <div class="empty-state" id="emptyState" style="display:none;">
+                <i class="fas fa-inbox"></i>
+                <h3>No Apps Found</h3>
+                <p id="emptyMessage">Apps load nahi ho paye. Please try again later.</p>
+            </div>
+        </div>
+
+        <!-- FOOTER -->
+        <footer class="footer">
+            <div class="footer-content">
+                <h3 id="footerTitle">📱 DMC Apps Store</h3>
+                <p id="footerSubtitle">Your one-stop destination for all premium apps</p>
+
+                <div class="brand-signature" id="footerBrandSignature">
+                    <i class="fas fa-crown"></i> Powered by Hitu Sir
+                </div>
+
+                <div class="footer-contact">
+                    <a href="https://wa.me/919648454608" target="_blank" id="footerWhatsappLink">
+                        <i class="fab fa-whatsapp"></i> <span id="footerWhatsappText">Help: +91 96484 54608</span>
+                    </a>
+                    <a href="tel:+919648454608" id="footerCallLink">
+                        <i class="fas fa-phone"></i> Call Us
+                    </a>
+                </div>
+
+                <div class="footer-copy" id="footerCopy">
+                    © 2025 DMC Apps Store • Made with ❤️ by <span class="hitu">Hitu Sir</span>
+                </div>
+            </div>
+        </footer>
+
+    </div>
+
+    <!-- ===== WHATSAPP FLOATING BUTTON ===== -->
+    <a href="https://wa.me/919648454608" class="whatsapp-float" target="_blank" id="whatsappFloatBtn">
+        <i class="fab fa-whatsapp"></i>
+        <div class="tooltip" id="whatsappTooltip">💬 Help: +91 96484 54608</div>
+    </a>
+
+    <!-- ===== APP DETAIL MODAL ===== -->
+    <div class="app-detail-overlay" id="appDetailOverlay">
+        <div class="app-detail-container">
+            <button class="app-detail-close" onclick="closeAppDetail()">
+                <i class="fas fa-times"></i>
+            </button>
+            <div id="appDetailContent">
+                <!-- Content will be loaded dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST -->
+    <div id="toast" class="toast"></div>
+
+    <script>
+        // ============================================================
+        // 🔥 FIREBASE CONFIG
+        // ============================================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyDjWxITBng54MCG_iMbnVatInyjIBLBl8s",
+            authDomain: "mobilerepairingapp-ae3d3.firebaseapp.com",
+            databaseURL: "https://mobilerepairingapp-ae3d3-default-rtdb.firebaseio.com",
+            projectId: "mobilerepairingapp-ae3d3",
+            storageBucket: "mobilerepairingapp-ae3d3.firebasestorage.app",
+            messagingSenderId: "372057217579",
+            appId: "1:372057217579:web:299297ace35c3564cba86e"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // ============================================================
+        // STATE
+        // ============================================================
+        let allApps = [];
+        let filteredApps = [];
+        let currentCategory = 'All';
+        let currentSettings = {};
+
+        // ============================================================
+        // 🖼️ SMART IMAGE URL CONVERTER
+        // ============================================================
+        function convertToDirectImageUrl(url) {
+            if (!url || typeof url !== 'string') return '';
+            
+            url = url.trim();
+            if (!url) return '';
+            
+            if (/\.(jpg|jpeg|png|gif|webp|bmp|svg)(\?.*)?$/i.test(url)) {
+                return url;
+            }
+            
+            let fileId = null;
+            
+            const patterns = [
+                /\/file\/d\/([a-zA-Z0-9_-]+)/,
+                /[?&]id=([a-zA-Z0-9_-]+)/,
+                /\/d\/([a-zA-Z0-9_-]+)/
+            ];
+            
+            for (const pattern of patterns) {
+                const match = url.match(pattern);
+                if (match && match[1]) {
+                    fileId = match[1];
+                    break;
+                }
+            }
+            
+            if (fileId && url.includes('drive.google.com')) {
+                return `https://drive.google.com/thumbnail?id=${fileId}&sz=w1000`;
+            }
+            
+            return url;
+        }
+
+        // ============================================================
+        // TOAST
+        // ============================================================
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast ' + type + ' show';
+            clearTimeout(toast._timer);
+            toast._timer = setTimeout(() => toast.classList.remove('show'), 3500);
+        }
+
+        // ============================================================
+        // 🌐 LOAD WEBSITE SETTINGS
+        // ============================================================
+        function loadWebsiteSettings() {
+            database.ref('WebsiteSettings').on('value', snap => {
+                const data = snap.val() || {};
+                currentSettings = data;
+
+                const settings = {
+                    Title: data.Title || 'DMC Apps Store',
+                    Tagline: data.Tagline || 'Download All Apps Free',
+                    LogoUrl: data.LogoUrl || '',
+                    PoweredBy: data.PoweredBy || 'POWERED BY HITU SIR',
+                    Whatsapp: data.Whatsapp || '919648454608',
+                    PhoneDisplay: data.PhoneDisplay || '+91 96484 54608',
+                    HeroHeading: data.HeroHeading || '🚀 Download Premium Apps For Free',
+                    HeroSubtitle: data.HeroSubtitle || 'All apps are verified, safe and 100% free. Click download and install directly on your device.',
+                    BrandLine: data.BrandLine || '✨ A DMC INITIATIVE • POWERED BY HITU SIR ✨',
+                    Watermark: data.Watermark || 'DMC'
+                };
+
+                document.title = settings.Title + ' - Download Apps Free';
+                const metaDesc = document.querySelector('meta[name="description"]');
+                if (metaDesc) metaDesc.content = 'Download premium apps for free. ' + settings.PoweredBy;
+
+                const titleEl = document.getElementById('siteTitle');
+                if (titleEl) titleEl.textContent = settings.Title;
+
+                const taglineEl = document.getElementById('siteTagline');
+                if (taglineEl) taglineEl.textContent = settings.Tagline;
+
+                const poweredEl = document.getElementById('sitePowered');
+                if (poweredEl) poweredEl.textContent = '⚡ ' + settings.PoweredBy;
+
+                const logoSvg = document.getElementById('dmcLogoSvg');
+                const logoImg = document.getElementById('dmcLogoImg');
+                
+                if (settings.LogoUrl && settings.LogoUrl.startsWith('http')) {
+                    const convertedLogo = convertToDirectImageUrl(settings.LogoUrl);
+                    if (logoImg) {
+                        logoImg.src = convertedLogo;
+                        logoImg.style.display = 'block';
+                        logoImg.style.width = '100%';
+                        logoImg.style.height = '100%';
+                        logoImg.style.objectFit = 'cover';
+                        logoImg.onerror = function() {
+                            this.style.display = 'none';
+                            if (logoSvg) logoSvg.style.display = 'block';
+                        };
+                    }
+                    if (logoSvg) logoSvg.style.display = 'none';
+                } else {
+                    if (logoSvg) logoSvg.style.display = 'block';
+                    if (logoImg) logoImg.style.display = 'none';
+                }
+
+                const heroH2 = document.getElementById('heroHeading');
+                if (heroH2) heroH2.textContent = settings.HeroHeading;
+
+                const heroP = document.getElementById('heroSubtitle');
+                if (heroP) heroP.textContent = settings.HeroSubtitle;
+
+                const brandLine = document.getElementById('brandLine');
+                if (brandLine) brandLine.textContent = settings.BrandLine;
+
+                const watermarkEl = document.getElementById('watermarkEl');
+                if (watermarkEl) watermarkEl.textContent = settings.Watermark;
+
+                let brandName = settings.PoweredBy;
+                if (brandName.toUpperCase().includes('POWERED BY')) {
+                    brandName = brandName.replace(/POWERED BY /i, '').replace(/Powered By /i, '').trim();
+                }
+                
+                const wcLeft = document.getElementById('watermarkCornerLeft');
+                if (wcLeft) wcLeft.textContent = brandName;
+
+                const wcRight = document.getElementById('watermarkCornerRight');
+                if (wcRight) wcRight.textContent = settings.Watermark + ' • ' + settings.PoweredBy;
+
+                const waLink = 'https://wa.me/' + settings.Whatsapp + 
+                    '?text=' + encodeURIComponent('Hello Sir, I need help with ' + settings.Title);
+
+                const waFloat = document.getElementById('whatsappFloatBtn');
+                if (waFloat) waFloat.href = waLink;
+
+                const waTooltip = document.getElementById('whatsappTooltip');
+                if (waTooltip) waTooltip.textContent = '💬 Help: ' + settings.PhoneDisplay;
+
+                const footerWa = document.getElementById('footerWhatsappLink');
+                if (footerWa) footerWa.href = waLink;
+
+                const footerWaText = document.getElementById('footerWhatsappText');
+                if (footerWaText) footerWaText.textContent = 'Help: ' + settings.PhoneDisplay;
+
+                const footerCall = document.getElementById('footerCallLink');
+                if (footerCall) footerCall.href = 'tel:+' + settings.Whatsapp;
+
+                const footerTitle = document.getElementById('footerTitle');
+                if (footerTitle) footerTitle.textContent = '📱 ' + settings.Title;
+
+                const footerBrandSig = document.getElementById('footerBrandSignature');
+                if (footerBrandSig) {
+                    footerBrandSig.innerHTML = '<i class="fas fa-crown"></i> ' + 
+                        settings.PoweredBy.replace(/POWERED BY /i, 'Powered by ').replace(/Powered By /i, 'Powered by ');
+                }
+
+                const footerCopy = document.getElementById('footerCopy');
+                if (footerCopy) {
+                    footerCopy.innerHTML = '© ' + new Date().getFullYear() + ' ' + settings.Title + 
+                        ' • Made with ❤️ by <span class="hitu">' + brandName + '</span>';
+                }
+
+                console.log('✅ Website settings loaded');
+            });
+        }
+
+        // ============================================================
+        // LOAD APPS
+        // ============================================================
+        function loadApps() {
+            const loader = document.getElementById('loader');
+            const grid = document.getElementById('appsGrid');
+            const empty = document.getElementById('emptyState');
+
+            loader.style.display = 'block';
+            grid.style.display = 'none';
+            empty.style.display = 'none';
+
+            database.ref('Apps').on('value', snap => {
+                const data = snap.val();
+                allApps = [];
+
+                if (data) {
+                    Object.keys(data).forEach(key => {
+                        const app = data[key];
+                        if (app.IsActive !== false) {
+                            app._key = key;
+                            allApps.push(app);
+                        }
+                    });
+                }
+
+                allApps.sort((a, b) => {
+                    const dateA = a.AddedAt ? new Date(a.AddedAt) : new Date(0);
+                    const dateB = b.AddedAt ? new Date(b.AddedAt) : new Date(0);
+                    return dateB - dateA;
+                });
+
+                loader.style.display = 'none';
+
+                if (allApps.length === 0) {
+                    grid.style.display = 'none';
+                    empty.style.display = 'block';
+                    document.getElementById('emptyMessage').textContent = 
+                        'Abhi koi app available nahi hai. Please check back later.';
+                    document.getElementById('totalAppsCount').textContent = '0';
+                    document.getElementById('totalDownloadsCount').textContent = '0';
+                    return;
+                }
+
+                updateStats();
+                renderCategories();
+
+                filteredApps = [...allApps];
+                renderApps(filteredApps);
+                grid.style.display = 'grid';
+            }, err => {
+                loader.style.display = 'none';
+                empty.style.display = 'block';
+                document.getElementById('emptyMessage').textContent = 
+                    'Error loading apps: ' + err.message;
+                showToast('Error loading apps!', 'error');
+            });
+        }
+
+        // ============================================================
+        // UPDATE STATS
+        // ============================================================
+        function updateStats() {
+            document.getElementById('totalAppsCount').textContent = allApps.length;
+
+            let totalDownloads = 0;
+            allApps.forEach(app => {
+                totalDownloads += (parseInt(app.Downloads) || 0);
+            });
+
+            let display = totalDownloads.toString();
+            if (totalDownloads >= 1000000) {
+                display = (totalDownloads / 1000000).toFixed(1) + 'M';
+            } else if (totalDownloads >= 1000) {
+                display = (totalDownloads / 1000).toFixed(1) + 'K';
+            }
+            document.getElementById('totalDownloadsCount').textContent = display;
+        }
+
+        // ============================================================
+        // RENDER CATEGORIES
+        // ============================================================
+        function renderCategories() {
+            const container = document.getElementById('categoriesContainer');
+            
+            const categories = new Set();
+            allApps.forEach(app => {
+                if (app.Category && app.Category.trim()) {
+                    categories.add(app.Category.trim());
+                }
+            });
+
+            const categoryIcons = {
+                'Tools': '🛠️', 'Games': '🎮', 'Education': '📚',
+                'Business': '💼', 'Entertainment': '🎬', 'Social': '💬',
+                'Utility': '⚙️', 'Repairing': '🔧', 'Other': '📦'
+            };
+
+            let html = `
+                <button class="category-btn ${currentCategory === 'All' ? 'active' : ''}" 
+                        onclick="filterByCategory('All', this)">
+                    🎯 All Apps
+                </button>
+            `;
+
+            Array.from(categories).sort().forEach(cat => {
+                const icon = categoryIcons[cat] || '📱';
+                html += `
+                    <button class="category-btn ${currentCategory === cat ? 'active' : ''}" 
+                            onclick="filterByCategory('${cat}', this)">
+                        ${icon} ${cat}
+                    </button>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // ============================================================
+        // RENDER APPS
+        // ============================================================
+        function renderApps(appsList) {
+            const grid = document.getElementById('appsGrid');
+
+            if (!appsList || appsList.length === 0) {
+                grid.innerHTML = `
+                    <div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:#888;">
+                        <i class="fas fa-search" style="font-size:48px;margin-bottom:16px;color:#dce1e8;"></i>
+                        <h3 style="color:#1a2332;margin-bottom:8px;">No apps found</h3>
+                        <p style="font-size:14px;">Try different search or category</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            appsList.forEach(app => {
+                const name = app.Name || 'Untitled App';
+                const version = app.Version || '1.0';
+                const category = app.Category || 'App';
+                const size = app.Size || '';
+                const description = app.Description || 'No description available.';
+                const downloadUrl = app.DownloadUrl || '#';
+                const downloads = parseInt(app.Downloads) || 0;
+
+                const iconUrl = convertToDirectImageUrl(app.IconUrl || '');
+                const screenshotUrl = convertToDirectImageUrl(app.ScreenshotUrl || '');
+
+                let downloadDisplay = downloads.toString();
+                if (downloads >= 1000000) downloadDisplay = (downloads / 1000000).toFixed(1) + 'M';
+                else if (downloads >= 1000) downloadDisplay = (downloads / 1000).toFixed(1) + 'K';
+
+                const iconHtml = iconUrl
+                    ? `<img src="${iconUrl}" class="app-icon" alt="${name}" onerror="this.outerHTML='<div class=\\'app-icon-placeholder\\'>📱</div>'">`
+                    : `<div class="app-icon-placeholder">📱</div>`;
+
+                const screenshotHtml = screenshotUrl
+                    ? `<div class="app-screenshot">
+                           <div class="app-screenshot-badge"><i class="fas fa-image"></i> Preview</div>
+                           <img src="${screenshotUrl}" 
+                                alt="${name} screenshot" 
+                                loading="lazy"
+                                onerror="this.parentElement.innerHTML='<div class=\\'app-screenshot-placeholder\\'><i class=\\'fas fa-mobile-alt\\'></i><span>${category}</span></div>'">
+                           <div class="app-screenshot-dmc">DMC</div>
+                       </div>`
+                    : `<div class="app-screenshot">
+                           <div class="app-screenshot-placeholder">
+                               <i class="fas fa-mobile-alt"></i>
+                               <span>${category}</span>
+                           </div>
+                           <div class="app-screenshot-dmc">DMC</div>
+                       </div>`;
+
+                html += `
+                    <div class="app-card" onclick="openAppDetail('${app._key}')">
+                        ${screenshotHtml}
+
+                        <div class="app-body">
+                            <div class="app-header">
+                                ${iconHtml}
+                                <div class="app-title-section">
+                                    <div class="app-name">${name}</div>
+                                    <div class="app-meta">
+                                        <span class="app-badge badge-version">v${version}</span>
+                                        <span class="app-badge badge-category">${category}</span>
+                                        ${size ? `<span class="app-badge badge-size">${size}</span>` : ''}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="app-description">${description}</div>
+                        </div>
+
+                        <div class="app-footer">
+                            <div class="download-count">
+                                <i class="fas fa-download"></i>
+                                <span>${downloadDisplay} downloads</span>
+                            </div>
+                            <a href="${downloadUrl}" 
+                               class="download-btn" 
+                               target="_blank"
+                               onclick="event.stopPropagation(); trackDownload('${app._key}')">
+                                <i class="fas fa-download"></i> Download
+                            </a>
+                        </div>
+                    </div>
+                `;
+            });
+
+            grid.innerHTML = html;
+        }
+
+        // ============================================================
+        // FILTER BY CATEGORY
+        // ============================================================
+        function filterByCategory(category, btn) {
+            currentCategory = category;
+
+            document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+
+            if (category === 'All') {
+                filteredApps = [...allApps];
+            } else {
+                filteredApps = allApps.filter(app => (app.Category || '').trim() === category);
+            }
+
+            const searchVal = document.getElementById('searchInput').value.toLowerCase().trim();
+            if (searchVal) {
+                filteredApps = filteredApps.filter(app =>
+                    (app.Name || '').toLowerCase().includes(searchVal) ||
+                    (app.Description || '').toLowerCase().includes(searchVal) ||
+                    (app.Category || '').toLowerCase().includes(searchVal)
+                );
+            }
+
+            renderApps(filteredApps);
+        }
+
+        // ============================================================
+        // SEARCH
+        // ============================================================
+        function filterApps() {
+            const q = document.getElementById('searchInput').value.toLowerCase().trim();
+
+            let list = [...allApps];
+
+            if (currentCategory !== 'All') {
+                list = list.filter(app => (app.Category || '').trim() === currentCategory);
+            }
+
+            if (q) {
+                list = list.filter(app =>
+                    (app.Name || '').toLowerCase().includes(q) ||
+                    (app.Description || '').toLowerCase().includes(q) ||
+                    (app.Category || '').toLowerCase().includes(q)
+                );
+            }
+
+            filteredApps = list;
+            renderApps(filteredApps);
+        }
+
+        // ============================================================
+        // 🎯 APP DETAIL MODAL FUNCTIONS
+        // ============================================================
+        function openAppDetail(appKey) {
+            const app = allApps.find(a => a._key === appKey);
+            if (!app) {
+                showToast('App not found!', 'error');
+                return;
+            }
+
+            const name = app.Name || 'Untitled App';
+            const version = app.Version || '1.0';
+            const category = app.Category || 'App';
+            const size = app.Size || 'N/A';
+            const description = app.Description || 'No description available.';
+            const downloadUrl = app.DownloadUrl || '#';
+            const downloads = parseInt(app.Downloads) || 0;
+
+            const iconUrl = convertToDirectImageUrl(app.IconUrl || '');
+            const screenshotUrl = convertToDirectImageUrl(app.ScreenshotUrl || '');
+
+            let downloadDisplay = downloads.toString();
+            if (downloads >= 1000000) downloadDisplay = (downloads / 1000000).toFixed(1) + 'M';
+            else if (downloads >= 1000) downloadDisplay = (downloads / 1000).toFixed(1) + 'K';
+
+            const iconHtml = iconUrl
+                ? `<img src="${iconUrl}" class="app-detail-icon" alt="${name}" onerror="this.outerHTML='<div class=\\'app-detail-icon-placeholder\\'>📱</div>'">`
+                : `<div class="app-detail-icon-placeholder">📱</div>`;
+
+            const screenshotHtml = screenshotUrl
+                ? `<div class="app-detail-screenshot">
+                       <div class="app-detail-preview-badge"><i class="fas fa-image"></i> Preview</div>
+                       <img src="${screenshotUrl}" 
+                            alt="${name} screenshot" 
+                            onerror="this.parentElement.innerHTML='<div class=\\'app-screenshot-placeholder\\'><i class=\\'fas fa-mobile-alt\\'></i><span>${category}</span></div>'">
+                       <div class="app-detail-dmc">DMC</div>
+                   </div>`
+                : `<div class="app-detail-screenshot">
+                       <div class="app-screenshot-placeholder">
+                           <i class="fas fa-mobile-alt"></i>
+                           <span>${category}</span>
+                       </div>
+                       <div class="app-detail-dmc">DMC</div>
+                   </div>`;
+
+            const descriptionHtml = description.replace(/\n/g, '<br>');
+
+            const html = `
+                ${screenshotHtml}
+                
+                <div class="app-detail-content">
+                    <div class="app-detail-header">
+                        ${iconHtml}
+                        <div class="app-detail-title-section">
+                            <div class="app-detail-name">${name}</div>
+                            <div class="app-detail-meta">
+                                <span class="app-badge badge-version">
+                                    <i class="fas fa-code-branch"></i> v${version}
+                                </span>
+                                <span class="app-badge badge-category">
+                                    <i class="fas fa-tag"></i> ${category}
+                                </span>
+                                <span class="app-badge badge-size">
+                                    <i class="fas fa-hdd"></i> ${size}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="app-detail-stats">
+                        <div class="app-detail-stat">
+                            <div class="app-detail-stat-icon">
+                                <i class="fas fa-download"></i>
+                            </div>
+                            <div class="app-detail-stat-info">
+                                <div class="app-detail-stat-label">Downloads</div>
+                                <div class="app-detail-stat-value">${downloadDisplay}</div>
+                            </div>
+                        </div>
+                        <div class="app-detail-stat">
+                            <div class="app-detail-stat-icon">
+                                <i class="fas fa-tag"></i>
+                            </div>
+                            <div class="app-detail-stat-info">
+                                <div class="app-detail-stat-label">Category</div>
+                                <div class="app-detail-stat-value">${category}</div>
+                            </div>
+                        </div>
+                        <div class="app-detail-stat">
+                            <div class="app-detail-stat-icon">
+                                <i class="fas fa-code-branch"></i>
+                            </div>
+                            <div class="app-detail-stat-info">
+                                <div class="app-detail-stat-label">Version</div>
+                                <div class="app-detail-stat-value">${version}</div>
+                            </div>
+                        </div>
+                        <div class="app-detail-stat">
+                            <div class="app-detail-stat-icon">
+                                <i class="fas fa-hdd"></i>
+                            </div>
+                            <div class="app-detail-stat-info">
+                                <div class="app-detail-stat-label">Size</div>
+                                <div class="app-detail-stat-value">${size}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="app-detail-section-title">
+                        <i class="fas fa-align-left"></i> Full Description
+                    </div>
+                    <div class="app-detail-description">${descriptionHtml}</div>
+
+                    <div class="app-detail-actions">
+                        <a href="${downloadUrl}" 
+                           class="app-detail-download-btn" 
+                           target="_blank"
+                           onclick="event.stopPropagation(); trackDownload('${app._key}')">
+                            <i class="fas fa-download"></i> Download Now
+                        </a>
+                        <button class="app-detail-share-btn" onclick="event.stopPropagation(); shareApp('${app._key}')">
+                            <i class="fas fa-share-alt"></i> Share
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('appDetailContent').innerHTML = html;
+            document.getElementById('appDetailOverlay').classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeAppDetail() {
+            document.getElementById('appDetailOverlay').classList.remove('show');
+            document.body.style.overflow = '';
+        }
+
+        function shareApp(appKey) {
+            const app = allApps.find(a => a._key === appKey);
+            if (!app) return;
+
+            const name = app.Name || 'App';
+            const text = `Check out ${name} on DMC Apps Store! Download free apps at: ${window.location.href}`;
+
+            if (navigator.share) {
+                navigator.share({
+                    title: name,
+                    text: text,
+                    url: window.location.href
+                }).catch(err => {
+                    if (err.name !== 'AbortError') console.log('Share error:', err);
+                });
+            } else {
+                navigator.clipboard.writeText(text).then(() => {
+                    showToast('✅ Link copied to clipboard!', 'success');
+                }).catch(() => {
+                    showToast('Unable to share', 'error');
+                });
+            }
+        }
+
+        // Close on overlay click
+        document.getElementById('appDetailOverlay').addEventListener('click', function(e) {
+            if (e.target === this) closeAppDetail();
+        });
+
+        // Close on Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const overlay = document.getElementById('appDetailOverlay');
+                if (overlay && overlay.classList.contains('show')) {
+                    closeAppDetail();
+                }
+            }
+        });
+
+        // ============================================================
+        // TRACK DOWNLOAD
+        // ============================================================
+        function trackDownload(appKey) {
+            if (!appKey) return;
+            
+            database.ref('Apps/' + appKey + '/Downloads').transaction(current => {
+                return (current || 0) + 1;
+            }).then(() => {
+                showToast('✅ Download started!', 'success');
+            }).catch(err => {
+                console.log('Track error:', err);
+            });
+        }
+
+        // ============================================================
+        // 💬 MOTIVATIONAL SLOGANS (Hindi + English)
+        // ============================================================
+        const SLOGANS = [
+            {
+                icon: '💪',
+                hindi: 'मेहनत करने वालों की कभी हार नहीं होती',
+                english: 'Those who work hard, never lose',
+                author: '— Hitu Sir'
+            },
+            {
+                icon: '🌟',
+                hindi: 'सपने वो नहीं जो सोते हुए देखें, सपने वो हैं जो सोने न दें',
+                english: 'Dreams are not what you see while sleeping, they are what don\'t let you sleep',
+                author: '— Dr. A.P.J. Abdul Kalam'
+            },
+            {
+                icon: '🚀',
+                hindi: 'कोशिश करने वालों की कभी हार नहीं होती',
+                english: 'Those who keep trying, never fail',
+                author: '— Hitu Sir'
+            },
+            {
+                icon: '🌅',
+                hindi: 'हर मुश्किल के बाद एक नई सुबह होती है',
+                english: 'After every difficulty comes a new dawn',
+                author: '— Hitu Sir'
+            },
+            {
+                icon: '⚡',
+                hindi: 'जो आज करोगे वही कल बनेगा',
+                english: 'What you do today becomes your tomorrow',
+                author: '— Hitu Sir'
+            },
+            {
+                icon: '🏆',
+                hindi: 'सफलता का कोई शॉर्टकट नहीं होता',
+                english: 'There is no shortcut to success',
+                author: '— Hitu Sir'
+            },
+            {
+                icon: '🎯',
+                hindi: 'अपने सपनों को पूरा करने के लिए खुद पर भरोसा रखो',
+                english: 'Believe in yourself to fulfill your dreams',
+                author: '— Hitu Sir'
+            },
+            {
+                icon: '🔥',
+                hindi: 'मेहनत इतनी खामोशी से करो कि सफलता शोर कर दे',
+                english: 'Work so hard in silence that success makes the noise',
+                author: '— Hitu Sir'
+            },
+            {
+                icon: '💎',
+                hindi: 'गिरना बुरा नहीं, गिर कर न उठना बुरा है',
+                english: 'Falling is not bad, not getting up after falling is',
+                author: '— Hitu Sir'
+            },
+            {
+                icon: '👑',
+                hindi: 'खुद को कम मत समझो, तुम वो हो जो तुम बनना चाहते हो',
+                english: 'Never underestimate yourself, you are what you want to become',
+                author: '— Hitu Sir'
+            }
+        ];
+
+        let currentSloganIndex = 0;
+        let sloganTimer = null;
+
+        function renderSloganDots() {
+            const dotsContainer = document.getElementById('sloganDots');
+            if (!dotsContainer) return;
+            
+            let html = '';
+            SLOGANS.forEach((_, i) => {
+                html += `<div class="slogan-dot ${i === currentSloganIndex ? 'active' : ''}" 
+                              onclick="jumpToSlogan(${i})"></div>`;
+            });
+            dotsContainer.innerHTML = html;
+        }
+
+        function showSlogan(index, animate = true) {
+            const textEl = document.getElementById('sloganText');
+            const subtextEl = document.getElementById('sloganSubtext');
+            const authorEl = document.getElementById('sloganAuthor');
+            const iconEl = document.getElementById('sloganIcon');
+            
+            if (!textEl || !subtextEl) return;
+            
+            const slogan = SLOGANS[index];
+            
+            if (animate) {
+                textEl.classList.add('slogan-fade-out');
+                subtextEl.classList.add('slogan-fade-out');
+                
+                setTimeout(() => {
+                    textEl.textContent = slogan.hindi;
+                    subtextEl.textContent = slogan.english;
+                    if (authorEl) authorEl.textContent = slogan.author;
+                    if (iconEl) iconEl.textContent = slogan.icon;
+                    
+                    textEl.classList.remove('slogan-fade-out');
+                    subtextEl.classList.remove('slogan-fade-out');
+                    
+                    renderSloganDots();
+                }, 400);
+            } else {
+                textEl.textContent = slogan.hindi;
+                subtextEl.textContent = slogan.english;
+                if (authorEl) authorEl.textContent = slogan.author;
+                if (iconEl) iconEl.textContent = slogan.icon;
+                renderSloganDots();
+            }
+        }
+
+        function nextSlogan() {
+            currentSloganIndex = (currentSloganIndex + 1) % SLOGANS.length;
+            showSlogan(currentSloganIndex, true);
+        }
+
+        function jumpToSlogan(index) {
+            if (index === currentSloganIndex) return;
+            currentSloganIndex = index;
+            showSlogan(currentSloganIndex, true);
+            resetSloganTimer();
+        }
+
+        function resetSloganTimer() {
+            if (sloganTimer) clearInterval(sloganTimer);
+            sloganTimer = setInterval(nextSlogan, 5000);
+        }
+
+        function initSlogans() {
+            showSlogan(0, false);
+            resetSloganTimer();
+            console.log('✅ Slogans initialized - ' + SLOGANS.length + ' slogans loaded');
+        }
+
+        // ============================================================
+        // INIT
+        // ============================================================
+        loadWebsiteSettings();
+        loadApps();
+        initSlogans();
+
+        console.log('✅ DMC Apps Store loaded - Powered by Hitu Sir');
+    </script>
+</body>
+</html>
