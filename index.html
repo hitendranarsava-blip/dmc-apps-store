@@ -236,15 +236,138 @@
             margin-top: 3px;
         }
 
-        /* ===== HERO ===== */
-        .hero {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: #fff;
-            padding: 60px 24px 80px;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
+        /* ===== HERO (NEW - Photo Left, Text Right) ===== */
+.hero {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+    padding: 40px 24px 60px;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-inner {
+    max-width: 1300px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 40px;
+    position: relative;
+    z-index: 2;
+}
+
+/* Left: Photo Box */
+.hero-photo {
+    flex-shrink: 0;
+    width: 220px;
+    height: 220px;
+    border-radius: 20px;
+    overflow: hidden;
+    background: #fff;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.35);
+    border: 4px solid rgba(255,255,255,0.9);
+    position: relative;
+}
+
+.hero-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.hero-photo-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #4fc3f7 0%, #29b6f6 100%);
+    font-size: 80px;
+    color: #fff;
+}
+
+/* Right: Text */
+.hero-text {
+    flex: 1;
+    min-width: 0;
+    text-align: left;
+}
+
+.hero h2 {
+    font-size: 38px;
+    margin-bottom: 14px;
+    font-weight: 800;
+    position: relative;
+    z-index: 1;
+    letter-spacing: -0.5px;
+    line-height: 1.2;
+}
+
+.hero p {
+    font-size: 16px;
+    opacity: 0.92;
+    max-width: 620px;
+    position: relative;
+    z-index: 1;
+    line-height: 1.6;
+    margin-bottom: 12px;
+}
+
+.hero .brand-line {
+    margin-top: 16px;
+    font-size: 12px;
+    letter-spacing: 4px;
+    font-weight: 700;
+    color: #ffd700;
+    position: relative;
+    z-index: 1;
+    text-transform: uppercase;
+}
+
+/* Hide old ::before / ::after watermarks */
+.hero::before,
+.hero::after {
+    display: none;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .hero {
+        padding: 30px 20px 50px;
+    }
+    .hero-inner {
+        flex-direction: column;
+        gap: 24px;
+        text-align: center;
+    }
+    .hero-photo {
+        width: 160px;
+        height: 160px;
+    }
+    .hero-text {
+        text-align: center;
+    }
+    .hero h2 {
+        font-size: 24px;
+    }
+    .hero p {
+        font-size: 14px;
+    }
+    .hero .brand-line {
+        font-size: 10px;
+        letter-spacing: 2px;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-photo {
+        width: 130px;
+        height: 130px;
+    }
+    .hero h2 {
+        font-size: 20px;
+    }
+}
 
         .hero::before {
             content: 'HITU SIR';
@@ -1603,12 +1726,25 @@
             </div>
         </header>
 
-        <!-- HERO -->
-        <section class="hero">
+   <!-- HERO -->
+<section class="hero" id="heroSection">
+    <div class="hero-inner">
+        <!-- LEFT: Photo -->
+        <div class="hero-photo" id="heroPhotoWrap">
+            <img id="heroPhotoImg" src="" alt="Hitu Sir" style="display:none;">
+            <div id="heroPhotoPlaceholder" class="hero-photo-placeholder">
+                <i class="fas fa-user-tie"></i>
+            </div>
+        </div>
+
+        <!-- RIGHT: Text -->
+        <div class="hero-text">
             <h2 id="heroHeading">🚀 Download Premium Apps</h2>
             <p id="heroSubtitle">All apps are verified, safe and 100% free. Click download and install directly on your device.</p>
             <div class="brand-line" id="brandLine">✨ A DMC INITIATIVE • POWERED BY HITU SIR ✨</div>
-        </section>
+        </div>
+    </div>
+</section>
 
         <!-- ===== MOTIVATIONAL SLOGAN BANNER ===== -->
         <div class="slogan-banner">
@@ -1776,17 +1912,18 @@
                 currentSettings = data;
 
                 const settings = {
-                    Title: data.Title || 'DMC Apps Store',
-                    Tagline: data.Tagline || 'Download All Apps Free',
-                    LogoUrl: data.LogoUrl || '',
-                    PoweredBy: data.PoweredBy || 'POWERED BY HITU SIR',
-                    Whatsapp: data.Whatsapp || '919648454608',
-                    PhoneDisplay: data.PhoneDisplay || '+91 96484 54608',
-                    HeroHeading: data.HeroHeading || '🚀 Download Premium Apps For Free',
-                    HeroSubtitle: data.HeroSubtitle || 'All apps are verified, safe and 100% free. Click download and install directly on your device.',
-                    BrandLine: data.BrandLine || '✨ A DMC INITIATIVE • POWERED BY HITU SIR ✨',
-                    Watermark: data.Watermark || 'DMC'
-                };
+    Title: data.Title || 'DMC Apps Store',
+    Tagline: data.Tagline || 'Download All Apps Free',
+    LogoUrl: data.LogoUrl || '',
+    HeroImageUrl: data.HeroImageUrl || '',   // ✅ NAYA ADD KIYA
+    PoweredBy: data.PoweredBy || 'POWERED BY HITU SIR',
+    Whatsapp: data.Whatsapp || '919648454608',
+    PhoneDisplay: data.PhoneDisplay || '+91 96484 54608',
+    HeroHeading: data.HeroHeading || '🚀 Download Premium Apps For Free',
+    HeroSubtitle: data.HeroSubtitle || 'All apps are verified, safe and 100% free. Click download and install directly on your device.',
+    BrandLine: data.BrandLine || '✨ A DMC INITIATIVE • POWERED BY HITU SIR ✨',
+    Watermark: data.Watermark || 'DMC'
+};
 
                 document.title = settings.Title + ' - Download Apps Free';
                 const metaDesc = document.querySelector('meta[name="description"]');
@@ -1828,6 +1965,28 @@
 
                 const heroP = document.getElementById('heroSubtitle');
                 if (heroP) heroP.textContent = settings.HeroSubtitle;
+                // ✅ NAYA: Hero Background Image Apply karo
+// ✅ NAYA: Hero Photo Apply karo (Left Side Photo)
+const heroPhotoImg = document.getElementById('heroPhotoImg');
+const heroPhotoPlaceholder = document.getElementById('heroPhotoPlaceholder');
+
+if (heroPhotoImg && settings.HeroImageUrl) {
+    const heroImgUrl = convertToDirectImageUrl(settings.HeroImageUrl);
+    if (heroImgUrl && heroImgUrl.startsWith('http')) {
+        heroPhotoImg.src = heroImgUrl;
+        heroPhotoImg.style.display = 'block';
+        if (heroPhotoPlaceholder) heroPhotoPlaceholder.style.display = 'none';
+
+        // Fallback if image fails
+        heroPhotoImg.onerror = function() {
+            this.style.display = 'none';
+            if (heroPhotoPlaceholder) heroPhotoPlaceholder.style.display = 'flex';
+        };
+    }
+} else if (heroPhotoImg) {
+    heroPhotoImg.style.display = 'none';
+    if (heroPhotoPlaceholder) heroPhotoPlaceholder.style.display = 'flex';
+}
 
                 const brandLine = document.getElementById('brandLine');
                 if (brandLine) brandLine.textContent = settings.BrandLine;
@@ -2486,5 +2645,3 @@
     </script>
 </body>
 </html>
-  
-<!-- Admin Panel - Live -->
