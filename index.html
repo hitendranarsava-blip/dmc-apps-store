@@ -287,10 +287,11 @@
 }
 
 /* Right: Text */
+/* Right: Text */
 .hero-text {
     flex: 1;
     min-width: 0;
-    text-align: left;
+    text-align: center;   /* ✅ Left से Center कर दिया */
 }
 
 .hero h2 {
@@ -304,9 +305,10 @@
 }
 
 .hero p {
-    font-size: 16px;
+    font-size: 14px;        /* फॉन्ट छोटा किया */
     opacity: 0.92;
-    max-width: 620px;
+    max-width: 100%;         /* पूरी चौड़ाई लेने दी */
+    white-space: nowrap;     /* एक लाइन में रोकने के लिए */
     position: relative;
     z-index: 1;
     line-height: 1.6;
@@ -350,8 +352,9 @@
     .hero h2 {
         font-size: 24px;
     }
-    .hero p {
-        font-size: 14px;
+        .hero p {
+        font-size: 13px;
+        white-space: normal;
     }
     .hero .brand-line {
         font-size: 10px;
@@ -1742,6 +1745,21 @@
             <h2 id="heroHeading">🚀 Download Premium Apps</h2>
             <p id="heroSubtitle">All apps are verified, safe and 100% free. Click download and install directly on your device.</p>
             <div class="brand-line" id="brandLine">✨ A DMC INITIATIVE • POWERED BY HITU SIR ✨</div>
+
+<!-- ✅ नया CTA Section -->
+<div style="margin-top: 20px; text-align: center;">
+    <a href="https://wa.me/919648454608?text=Hello%20Sir,%20I%20want%20to%20build%20my%20own%20Website%20or%20Mobile%20App." 
+       target="_blank"
+       style="display: inline-block; padding: 14px 28px; background: #fff; color: #764ba2; 
+              font-weight: 800; font-size: 14px; border-radius: 30px; text-decoration: none;
+              box-shadow: 0 8px 24px rgba(0,0,0,0.25); transition: 0.3s;">
+        💼 अगर आपको अपना खुद का Website या Mobile App बनवाना है तो संपर्क करें
+        <br>
+        <span style="font-size: 12px; font-weight: 600; opacity: 0.8;">
+            If you want to build your own Website or Mobile App, Contact Us
+        </span>
+    </a>
+</div>
         </div>
     </div>
 </section>
