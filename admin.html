@@ -1249,6 +1249,192 @@
         .sidebar .menu li.hidden-for-agent {
             display: none !important;
         }
+        /* ============================================================ */
+/* 🍎 iPhone / iOS SPECIFIC FIXES */
+/* ============================================================ */
+
+/* ✅ FIX 1: iOS में 100vh की समस्या (content कट जाता है) */
+@supports (-webkit-touch-callout: none) {
+    body {
+        min-height: -webkit-fill-available;
+    }
+    .sidebar {
+        height: -webkit-fill-available;
+        padding-bottom: 80px;
+    }
+}
+
+/* ✅ FIX 2: iPhone पर Menu Toggle बड़ा और Clickable */
+@media (max-width: 768px) {
+    .menu-toggle {
+        display: block !important;
+        width: 46px;
+        height: 46px;
+        padding: 0;
+        font-size: 22px;
+        border-radius: 10px;
+        background: #1a2332;
+        color: #fff;
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+    }
+
+    /* ✅ FIX 3: Sidebar iOS पर smooth scroll */
+    .sidebar {
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
+        padding-bottom: 100px;
+    }
+
+    /* ✅ FIX 4: Table iOS पर horizontal scroll */
+    .table-wrapper {
+        -webkit-overflow-scrolling: touch;
+        overflow-x: auto;
+        overflow-y: hidden;
+        width: 100%;
+        display: block;
+    }
+    .table-wrapper table {
+        min-width: 700px;
+        white-space: nowrap;
+    }
+
+    /* ✅ FIX 5: Input पर iOS zoom रोकें (font-size 16px+) */
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="number"],
+    input[type="tel"],
+    select,
+    textarea {
+        font-size: 16px !important;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        border-radius: 8px;
+    }
+
+    /* ✅ FIX 6: Modal iOS पर screen से बाहर न जाए */
+    .modal-overlay {
+        padding: 10px;
+        align-items: flex-start;
+        padding-top: 20px;
+    }
+    .modal {
+        max-height: 88vh;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        padding: 20px 18px;
+        margin: 0;
+        border-radius: 16px;
+        width: 100%;
+        max-width: 100%;
+    }
+    .modal .form-row {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    .modal .form-actions {
+        flex-direction: column;
+        gap: 8px;
+    }
+    .modal .form-actions .btn {
+        width: 100%;
+        padding: 12px;
+    }
+
+    /* ✅ FIX 7: Search Box iOS पर ठीक से दिखे */
+    .search-box {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .search-box input,
+    .search-box button {
+        width: 100%;
+        margin-bottom: 6px;
+    }
+    .search-box button {
+        padding: 12px;
+        font-size: 14px;
+    }
+
+    /* ✅ FIX 8: Buttons iOS पर tap-able */
+    .btn,
+    button,
+    a.btn {
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+        cursor: pointer;
+    }
+
+    /* ✅ FIX 9: Stats Grid iOS पर 2 कॉलम */
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 12px;
+    }
+    .stat-card {
+        padding: 14px 12px;
+    }
+    .stat-card .number {
+        font-size: 24px;
+    }
+    .stat-card h3 {
+        font-size: 11px;
+    }
+
+    /* ✅ FIX 10: Top Bar iOS पर ठीक से दिखे */
+    .top-bar {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 12px 16px;
+        gap: 12px;
+    }
+    .top-bar .user-info {
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    .top-bar h1 {
+        font-size: 17px;
+    }
+    .logout-btn {
+        padding: 8px 14px;
+        font-size: 12px;
+    }
+    .role-badge {
+        font-size: 10px;
+        padding: 3px 10px;
+    }
+    .avatar {
+        width: 34px !important;
+        height: 34px !important;
+        font-size: 15px !important;
+    }
+}
+
+/* ✅ FIX 11: छोटे iPhone (SE, 5, 6) के लिए */
+@media (max-width: 375px) {
+    .stats-grid {
+        grid-template-columns: 1fr !important;
+    }
+    .modal {
+        padding: 16px 14px;
+    }
+    .panel h2 {
+        font-size: 17px;
+    }
+    .panel .subtitle {
+        font-size: 12px;
+    }
+}
+
+/* ✅ FIX 12: iOS Safari में sticky header fix */
+@supports (-webkit-touch-callout: none) {
+    .header,
+    .top-bar {
+        position: relative;
+    }
+}
     </style>
 </head>
 <body>
@@ -1319,6 +1505,7 @@
             <li data-panel="config"><i class="fas fa-cog"></i> App Config</li>
             <li data-panel="alarm"><i class="fas fa-bell"></i> Alarm Control</li>
             <li data-panel="website" class="admin-only"><i class="fas fa-globe"></i> Website Control</li>
+            <li data-panel="uarttool" class="admin-only"><i class="fas fa-microchip"></i> UART Tool Control</li>
         </ul>
     </nav>
 
@@ -2315,6 +2502,71 @@
         </div>
     </div>
 </div>
+<!-- 🔌 UART TOOL CONTROL PANEL -->
+<div id="panel-uarttool" class="panel">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:20px;">
+        <div>
+            <h2 style="margin-bottom:4px;">🔌 UART Tool Control</h2>
+            <p class="subtitle" style="margin:0;">Manage UART Tool users, licenses & settings</p>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn btn-primary" onclick="loadUartUsers()"><i class="fas fa-sync"></i> Refresh</button>
+            <button class="btn btn-info" onclick="window.open('https://dmcuarttool.web.app','_blank')"><i class="fas fa-external-link-alt"></i> Open UART Tool</button>
+        </div>
+    </div>
+
+    <div class="stats-grid" style="margin-bottom:20px;">
+        <div class="stat-card" style="border-left-color:#4fc3f7;">
+            <h3>Total UART Users</h3>
+            <div class="number" id="uartTotalUsers">0</div>
+        </div>
+        <div class="stat-card" style="border-left-color:#27ae60;">
+            <h3>Active (Paid)</h3>
+            <div class="number" id="uartActiveUsers">0</div>
+        </div>
+        <div class="stat-card" style="border-left-color:#f39c12;">
+            <h3>Pending</h3>
+            <div class="number" id="uartPendingUsers">0</div>
+        </div>
+        <div class="stat-card" style="border-left-color:#e74c3c;">
+            <h3>Expired</h3>
+            <div class="number" id="uartExpiredUsers">0</div>
+        </div>
+    </div>
+
+    <div class="search-box">
+        <input type="text" id="uartSearchInput" 
+       placeholder="🔍 Search by Name, Mobile, Email, PC Name..." 
+       oninput="autoSearchUart()">
+<button class="btn btn-primary" onclick="filterUartUsers()">
+    <i class="fas fa-search"></i> Search
+</button>
+<button class="btn btn-secondary" onclick="clearUartSearch()">
+    <i class="fas fa-times"></i> Clear
+</button>
+        <button class="btn btn-success" onclick="exportUartUsersToExcel()"><i class="fas fa-file-excel"></i> Export Excel</button>
+    </div>
+
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Name</th>
+                    <th>Mobile</th>
+                    <th>Email</th>
+                    <th>PC Name</th>
+                    <th>Registered</th>
+                    <th>Validity</th>
+                    <th style="text-align:center;">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="uartUsersTableBody">
+                <tr><td colspan="8" style="text-align:center;color:#888;padding:30px;"><i class="fas fa-spinner fa-spin"></i> Loading UART users...</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
 
         <!-- ⚙️ APP CONFIG (Alarm Control ke baad) -->
         
@@ -2763,6 +3015,22 @@
 
         firebase.initializeApp(firebaseConfig);
 const database = firebase.database();
+// ============================================================
+// 🔥 दूसरा Firebase - DMC UART TOOL
+// ============================================================
+const uartFirebaseConfig = {
+    apiKey: "AIzaSyASdq40nHr55VmswIwJnJwdpuIZXaysl1A",
+    authDomain: "dmcuarttool.firebaseapp.com",
+    databaseURL: "https://dmcuarttool-default-rtdb.firebaseio.com",
+    projectId: "dmcuarttool",
+    storageBucket: "dmcuarttool.firebasestorage.app",
+    messagingSenderId: "310887150469",
+    appId: "1:310887150469:web:50f231071ef21bbc624aec",
+    measurementId: "G-MRBB51XM8W"
+};
+const uartApp = firebase.initializeApp(uartFirebaseConfig, "UART_APP");
+const uartDatabase = uartApp.database();
+console.log('✅ DMC UART Tool Firebase connected');
 
 // ✅ NAYA: Notification permission maangein (page load hote hi)
 if (Notification.permission !== "granted" && Notification.permission !== "denied") {
@@ -2842,6 +3110,7 @@ if (Notification.permission !== "granted" && Notification.permission !== "denied
                 case 'config': loadConfig(); break;
                 case 'alarm': loadAlarmConfig(); break;
                 case 'website': loadWebsiteApps(); break;
+                                case 'uarttool': loadUartUsers(); break;
                                 case 'agents': loadAgents(); break;
             }
         }
@@ -5000,7 +5269,8 @@ function loadDashboardGraph() {
             { id: 'config', name: 'App Config', icon: 'fa-cog', desc: 'App version settings' },
             { id: 'alarm', name: 'Alarm Control', icon: 'fa-bell', desc: 'Manage alarms' },
             { id: 'website', name: 'Website Control', icon: 'fa-globe', desc: 'Manage website apps & settings' },
-        ];
+{ id: 'uarttool', name: 'UART Tool Control', icon: 'fa-microchip', desc: 'Manage UART tool users' },
+];
 
         // ✅ Current session
         let currentUser = {
@@ -6665,6 +6935,252 @@ setInterval(() => {
 }, 30000);
 
 console.log('✅ Admin Control Panel Loaded');
+// ============================================================
+// 🔌 UART TOOL FUNCTIONS
+// ============================================================
+let allUartUsers = [];
+
+function loadUartUsers() {
+    const tbody = document.getElementById('uartUsersTableBody');
+    if (!tbody) return;
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#888;padding:30px;"><i class="fas fa-spinner fa-spin"></i> Loading UART users...</td></tr>';
+
+    uartDatabase.ref('Users').once('value', snap => {
+        const data = snap.val();
+        allUartUsers = [];
+        if (data) {
+            Object.keys(data).forEach(key => {
+                const u = data[key];
+                u._key = key;
+                allUartUsers.push(u);
+            });
+        }
+        allUartUsers.sort((a, b) => {
+            const pd = (s) => { if (!s) return new Date(0); const p = s.split('-'); return p.length === 3 ? new Date(parseInt(p[2]), parseInt(p[1]) - 1, parseInt(p[0])) : new Date(0); };
+            return pd(b.RegistrationDate) - pd(a.RegistrationDate);
+        });
+        updateUartStats();
+        renderUartUsers(allUartUsers);
+    }).catch(err => {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#e74c3c;padding:30px;">Error: ' + err.message + '</td></tr>';
+    });
+}
+
+function updateUartStats() {
+    let active = 0, pending = 0, expired = 0;
+    const today = new Date();
+    allUartUsers.forEach(u => {
+        const v = u.ValidityDate || 'Pending';
+        if (v === 'Pending' || !v) { pending++; return; }
+        const p = v.split('-');
+        if (p.length === 3) {
+            const vDate = new Date(parseInt(p[2]), parseInt(p[1]) - 1, parseInt(p[0]));
+            if (vDate > today) active++; else expired++;
+        } else pending++;
+    });
+    document.getElementById('uartTotalUsers').textContent = allUartUsers.length;
+    document.getElementById('uartActiveUsers').textContent = active;
+    document.getElementById('uartPendingUsers').textContent = pending;
+    document.getElementById('uartExpiredUsers').textContent = expired;
+}
+
+function renderUartUsers(list) {
+    const tbody = document.getElementById('uartUsersTableBody');
+    if (!tbody) return;
+    if (!list || list.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#888;padding:30px;">No UART users found.</td></tr>';
+        return;
+    }
+    let html = '';
+    list.forEach((u, i) => {
+        const initial = (u.Name || 'U').charAt(0).toUpperCase();
+        let vBadge = '';
+        const v = u.ValidityDate || 'Pending';
+        if (v === 'Pending' || !v) {
+            vBadge = `<span style="background:#fff3cd;color:#856404;padding:4px 12px;border-radius:12px;font-size:12px;font-weight:700;border:1px solid #ffc107;">⏳ PENDING</span>`;
+        } else {
+            const p = v.split('-');
+            const vDate = new Date(parseInt(p[2]), parseInt(p[1]) - 1, parseInt(p[0]));
+            if (vDate > new Date()) {
+                vBadge = `<span style="background:#d4edda;color:#155724;padding:4px 12px;border-radius:12px;font-size:12px;font-weight:700;border:1px solid #28a745;">✅ ${v}</span>`;
+            } else {
+                vBadge = `<span style="background:#f8d7da;color:#721c24;padding:4px 12px;border-radius:12px;font-size:12px;font-weight:700;border:1px solid #dc3545;">❌ ${v}</span>`;
+            }
+        }
+        html += `<tr>
+            <td>${i + 1}</td>
+            <td><div style="display:flex;align-items:center;gap:10px;"><div style="width:34px;height:34px;border-radius:50%;background:#4fc3f7;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;">${initial}</div><strong>${u.Name || 'N/A'}</strong></div></td>
+            <td>${u.Mobile || 'N/A'}</td>
+            <td style="font-size:12px;color:#666;">${u.Email || 'N/A'}</td>
+            <td><span style="background:#e3f2fd;color:#1a73e8;padding:3px 10px;border-radius:12px;font-size:12px;">${u.PCName || 'N/A'}</span></td>
+            <td style="font-size:12px;color:#888;">${u.RegistrationDate || 'N/A'}</td>
+            <td>${vBadge}</td>
+            <td style="text-align:center;white-space:nowrap;">
+                <button class="btn btn-primary btn-sm" onclick="editUartUser('${u._key}')" title="Edit" style="margin-right:4px;"><i class="fas fa-edit"></i></button>
+                <button class="btn btn-success btn-sm" onclick="setUartValidityQuick('${u._key}','${u.Mobile}',1)" title="+1 Month" style="margin-right:4px;"><i class="fas fa-calendar-plus"></i></button>
+                <button class="btn btn-danger btn-sm" onclick="deleteUartUser('${u._key}')" title="Delete"><i class="fas fa-trash"></i></button>
+            </td>
+        </tr>`;
+    });
+    tbody.innerHTML = html;
+}
+// ============================================================
+// 🔍 AUTO SEARCH (Typing करते ही filter होगा)
+// ============================================================
+let uartSearchTimer = null;
+
+function autoSearchUart() {
+    clearTimeout(uartSearchTimer);
+    uartSearchTimer = setTimeout(() => {
+        filterUartUsers();
+    }, 300);  // 300ms baad search hoga (typing rokne par)
+}
+
+// ---------- CLEAR SEARCH ----------
+function clearUartSearch() {
+    document.getElementById('uartSearchInput').value = '';
+    renderUartUsers(allUartUsers);
+    showToast('Search cleared', 'info');
+}
+function filterUartUsers() {
+    const q = document.getElementById('uartSearchInput').value.toLowerCase().trim();
+    
+    if (!q) {
+        renderUartUsers(allUartUsers);
+        return;
+    }
+    
+    // ✅ Advanced Filter: Name, Mobile, Email, PC Name, PC ID, Registration Date, Validity
+    const filtered = allUartUsers.filter(u =>
+        (u.Name || '').toLowerCase().includes(q) ||
+        (u.Mobile || '').toString().toLowerCase().includes(q) ||
+        (u.Email || '').toLowerCase().includes(q) ||
+        (u.PCName || '').toLowerCase().includes(q) ||
+        (u.PCId || '').toLowerCase().includes(q) ||
+        (u.RegistrationDate || '').toLowerCase().includes(q) ||
+        (u.ValidityDate || '').toLowerCase().includes(q)
+    );
+    
+    renderUartUsers(filtered);
+    
+    // ✅ Result count toast (optional)
+    if (filtered.length === 0) {
+        showToast('❌ No users found for: ' + q, 'error');
+    } else {
+        showToast(`✅ Found ${filtered.length} user(s)`, 'success');
+    }
+}
+
+function editUartUser(key) {
+    uartDatabase.ref('Users/' + key).once('value', snap => {
+        const u = snap.val();
+        if (!u) { showToast('User not found!', 'error'); return; }
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay show';
+        modal.id = 'editUartUserModal';
+        modal.innerHTML = `
+            <div class="modal" style="max-width:650px;">
+                <button class="close-modal" onclick="document.getElementById('editUartUserModal').remove()">&times;</button>
+                <h2>✏️ Edit UART User</h2>
+                <p class="modal-subtitle">Update user details and validity</p>
+                <div class="form-row">
+                    <div class="form-group"><label>Name *</label><input type="text" id="euName" value="${u.Name || ''}"></div>
+                    <div class="form-group"><label>Mobile *</label><input type="text" id="euMobile" value="${u.Mobile || ''}"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Email</label><input type="email" id="euEmail" value="${u.Email || ''}"></div>
+                    <div class="form-group"><label>PC Name</label><input type="text" id="euPCName" value="${u.PCName || ''}" readonly style="background:#f0f0f0;"></div>
+                </div>
+                <div class="form-group"><label>PC ID</label><input type="text" id="euPCId" value="${u.PCId || ''}" style="font-family:monospace;font-size:12px;"></div>
+                <div class="form-group">
+                    <label>Validity Till *</label>
+                    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+                        <input type="text" id="euValidity" value="${u.ValidityDate || 'Pending'}" style="flex:1;padding:10px 14px;border:1px solid #dce1e8;border-radius:8px;font-size:14px;">
+                        <button class="btn btn-success btn-sm" onclick="setUartValidityMonths(1)">+1M</button>
+                        <button class="btn btn-success btn-sm" onclick="setUartValidityMonths(6)">+6M</button>
+                        <button class="btn btn-success btn-sm" onclick="setUartValidityMonths(12)">+1Y</button>
+                        <button class="btn btn-warning btn-sm" onclick="document.getElementById('euValidity').value='Pending'">Pending</button>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button class="btn btn-success" onclick="saveUartUser('${key}')"><i class="fas fa-save"></i> Save</button>
+                    <button class="btn btn-danger" onclick="document.getElementById('editUartUserModal').remove()"><i class="fas fa-times"></i> Cancel</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        modal.addEventListener('click', function(e) { if (e.target === this) modal.remove(); });
+    });
+}
+
+function setUartValidityMonths(months) {
+    const date = new Date();
+    date.setMonth(date.getMonth() + months);
+    const d = String(date.getDate()).padStart(2, '0');
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const y = date.getFullYear();
+    document.getElementById('euValidity').value = `${d}-${m}-${y}`;
+    showToast(`Validity set to ${months} month(s)`, 'success');
+}
+
+function setUartValidityQuick(key, mobile, months) {
+    if (!confirm(`Set validity +${months} month(s) for ${mobile}?`)) return;
+    const date = new Date();
+    date.setMonth(date.getMonth() + months);
+    const d = String(date.getDate()).padStart(2, '0');
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const y = date.getFullYear();
+    const newValidity = `${d}-${m}-${y}`;
+    uartDatabase.ref('Users/' + key).update({ ValidityDate: newValidity }).then(() => {
+        showToast(`✅ Validity set to ${newValidity}`, 'success');
+        loadUartUsers();
+    }).catch(err => showToast('Error: ' + err.message, 'error'));
+}
+
+function saveUartUser(key) {
+    const name = document.getElementById('euName').value.trim();
+    const mobile = document.getElementById('euMobile').value.trim();
+    const email = document.getElementById('euEmail').value.trim();
+    const pcId = document.getElementById('euPCId').value.trim();
+    const validity = document.getElementById('euValidity').value.trim() || 'Pending';
+    if (!name) { showToast('Name is required!', 'error'); return; }
+    if (!mobile) { showToast('Mobile is required!', 'error'); return; }
+    uartDatabase.ref('Users/' + key).update({
+        Name: name, Mobile: mobile, Email: email, PCId: pcId, ValidityDate: validity
+    }).then(() => {
+        showToast('✅ UART user updated!', 'success');
+        document.getElementById('editUartUserModal').remove();
+        loadUartUsers();
+    }).catch(err => showToast('Error: ' + err.message, 'error'));
+}
+
+function deleteUartUser(key) {
+    if (!confirm('Delete this UART user permanently?')) return;
+    if (!confirm('⚠️ Final confirmation!')) return;
+    uartDatabase.ref('Users/' + key).remove().then(() => {
+        showToast('✅ UART user deleted!', 'success');
+        loadUartUsers();
+    }).catch(err => showToast('Error: ' + err.message, 'error'));
+}
+
+function exportUartUsersToExcel() {
+    if (!allUartUsers || allUartUsers.length === 0) {
+        showToast('No UART users to export!', 'error');
+        return;
+    }
+    const excelData = allUartUsers.map((u, i) => ({
+        '#': i + 1, 'Name': u.Name || '', 'Mobile': u.Mobile || '',
+        'Email': u.Email || '', 'PC Name': u.PCName || '', 'PC ID': u.PCId || '',
+        'Registration Date': u.RegistrationDate || '', 'Validity Date': u.ValidityDate || 'Pending'
+    }));
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.json_to_sheet(excelData);
+    ws['!cols'] = [{wch:5},{wch:22},{wch:16},{wch:28},{wch:22},{wch:20},{wch:15},{wch:15}];
+    XLSX.utils.book_append_sheet(wb, ws, 'UART Users');
+    XLSX.writeFile(wb, `UART_Users_${new Date().toLocaleDateString('en-IN').replace(/\//g, '_')}.xlsx`);
+    showToast(`✅ Exported ${excelData.length} UART users!`, 'success');
+}
+console.log('✅ UART functions loaded');
 
 // ============================================================
 // 🌐 WEBSITE CONTROL FUNCTIONS
