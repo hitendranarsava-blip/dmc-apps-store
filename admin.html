@@ -5303,77 +5303,149 @@ function loadDashboardGraph() {
         }
 
         // ---------- DO LOGIN ----------
-                // ---------- DO LOGIN (Password Only) ----------
+                   // ---------- DO LOGIN (iOS FIXED) ----------
         function doLogin() {
-            const role = document.getElementById('loginRole').value;
-            const password = document.getElementById('loginPassword').value.trim();
-            const btn = document.getElementById('loginBtn');
+            try {
+                const role = document.getElementById('loginRole').value;
+                const password = document.getElementById('loginPassword').value.trim();
+                const btn = document.getElementById('loginBtn');
 
-            if (!password) {
-                showLoginError('⚠️ Please enter password!');
-                return;
-            }
-
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
-
-            if (role === 'admin') {
-                // ✅ Admin Password: 1989
-                if (password === '1989') {
-                    onLoginSuccess({
-                        role: 'admin',
-                        username: 'Admin',
-                        permissions: ALL_PERMISSIONS.map(p => p.id)
-                    });
-                } else {
-                    btn.disabled = false;
-                    btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> LOGIN';
-                    showLoginError('❌ Invalid admin password!');
-                    document.getElementById('loginPassword').value = '';
+                if (!password) {
+                    showLoginError('⚠️ Please enter password!');
+                    return;
                 }
-            } else {
-                // ✅ Agent Password: 1234
-                if (password === '1234') {
-                    onLoginSuccess({
-                        role: 'agent',
-                        username: 'Agent',
-                        permissions: ['dashboard', 'liveclass', 'notice']  // Default agent permissions
-                    });
-                } else {
-                    btn.disabled = false;
-                    btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> LOGIN';
-                    showLoginError('❌ Invalid agent password!');
-                    document.getElementById('loginPassword').value = '';
-                }
+
+                // ✅ Button loading state
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
+
+                // ✅ iOS के लिए - Direct processing (setTimeout हटा दिया)
+                setTimeout(() => {
+                    try {
+                        if (role === 'admin') {
+                            if (password === '1989') {
+                                onLoginSuccess({
+                                    role: 'admin',
+                                    username: 'Admin',
+                                    permissions: ALL_PERMISSIONS.map(p => p.id)
+                                });
+                            } else {
+                                // ❌ Wrong password - reset button
+                                btn.disabled = false;
+                                btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> LOGIN';
+                                showLoginError('❌ Invalid admin password!');
+                                document.getElementById('loginPassword').value = '';
+                            }
+                        } else {
+                            if (password === '1234') {
+                                onLoginSuccess({
+                                    role: 'agent',
+                                    username: 'Agent',
+                                    permissions: ['dashboard', 'liveclass', 'notice']
+                                });
+                            } else {
+                                btn.disabled = false;
+                                btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> LOGIN';
+                                showLoginError('❌ Invalid agent password!');
+                                document.getElementById('loginPassword').value = '';
+                            }
+                        }
+                    } catch (e) {
+                        console.error('Login error:', e);
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> LOGIN';
+                        showLoginError('❌ Login failed: ' + e.message);
+                    }
+                }, 300); // iOS को button click register करने का time दो
+
+            } catch (err) {
+                console.error('❌ doLogin error:', err);
             }
         }
 
         // ---------- ON LOGIN SUCCESS ----------
+                // ---------- ON LOGIN SUCCESS (iOS FIXED) ----------
         function onLoginSuccess(user) {
-            currentUser = user;
+            try {
+                currentUser = user;
 
-            // ✅ Save session
-            sessionStorage.setItem('adminPanelUser', JSON.stringify(user));
+                // ✅ 1. Save session (iOS Safari के लिए try-catch में)
+                try {
+                    sessionStorage.setItem('adminPanelUser', JSON.stringify(user));
+                    localStorage.setItem('adminPanelUser', JSON.stringify(user)); // iOS backup
+                } catch (e) {
+                    console.warn('⚠️ Storage blocked (iOS Private Mode?):', e);
+                }
 
-            // ✅ Hide login screen
-            document.getElementById('loginScreen').style.display = 'none';
+                // ✅ 2. Hide login screen (iOS के लिए multiple methods)
+                const loginScreen = document.getElementById('loginScreen');
+                if (loginScreen) {
+                    loginScreen.style.display = 'none';
+                    loginScreen.style.visibility = 'hidden';
+                    loginScreen.style.opacity = '0';
+                    loginScreen.style.pointerEvents = 'none';
+                    // iOS Safari के लिए hard remove
+                    setTimeout(() => {
+                        if (loginScreen) {
+                            loginScreen.style.display = 'none';
+                            loginScreen.setAttribute('hidden', 'true');
+                        }
+                    }, 50);
+                }
 
-            // ✅ Apply permissions
-            applyPermissions();
+                // ✅ 3. Reset Login Button (iOS पर disabled वापस enable करो)
+                const btn = document.getElementById('loginBtn');
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> LOGIN';
+                }
 
-            // ✅ Update top bar
-            const roleBadge = document.getElementById('displayRoleBadge');
-            roleBadge.textContent = user.role === 'admin' ? '👑 Admin' : '👤 Agent';
-            roleBadge.className = 'role-badge ' + user.role;
+                // ✅ 4. Clear password field
+                const pwdField = document.getElementById('loginPassword');
+                if (pwdField) pwdField.value = '';
 
-            document.getElementById('displayUsername').textContent = user.username;
-            document.getElementById('displayAvatar').textContent = (user.username || 'U').charAt(0).toUpperCase();
+                // ✅ 5. Apply permissions
+                if (typeof applyPermissions === 'function') {
+                    applyPermissions();
+                }
 
-            // ✅ Load dashboard
-            loadDashboard();
-            startAlertListener();
+                // ✅ 6. Update top bar
+                const roleBadge = document.getElementById('displayRoleBadge');
+                if (roleBadge) {
+                    roleBadge.textContent = user.role === 'admin' ? '👑 Admin' : '👤 Agent';
+                    roleBadge.className = 'role-badge ' + user.role;
+                }
 
-            showToast(`✅ Welcome, ${user.username}!`, 'success');
+                const usernameEl = document.getElementById('displayUsername');
+                if (usernameEl) usernameEl.textContent = user.username;
+
+                const avatarEl = document.getElementById('displayAvatar');
+                if (avatarEl) avatarEl.textContent = (user.username || 'U').charAt(0).toUpperCase();
+
+                // ✅ 7. Load dashboard (try-catch में)
+                try {
+                    if (typeof loadDashboard === 'function') loadDashboard();
+                } catch (e) {
+                    console.error('Dashboard load error:', e);
+                }
+
+                try {
+                    if (typeof startAlertListener === 'function') startAlertListener();
+                } catch (e) {
+                    console.warn('Alert listener error:', e);
+                }
+
+                // ✅ 8. Show welcome toast
+                if (typeof showToast === 'function') {
+                    showToast(`✅ Welcome, ${user.username}!`, 'success');
+                }
+
+                console.log('✅ Login successful:', user);
+
+            } catch (err) {
+                console.error('❌ onLoginSuccess error:', err);
+                alert('Login error: ' + err.message);
+            }
         }
 
         // ---------- APPLY PERMISSIONS ----------
@@ -5446,39 +5518,86 @@ window.navigateTo = function(panelId) {
     }
 };
 
-        // ---------- DO LOGOUT ----------
+                // ---------- DO LOGOUT (iOS FIXED) ----------
         function doLogout() {
             if (!confirm('Are you sure you want to logout?')) return;
-            sessionStorage.removeItem('adminPanelUser');
+
+            // ✅ दोनों storage से clear करो
+            try { sessionStorage.removeItem('adminPanelUser'); } catch (e) {}
+            try { localStorage.removeItem('adminPanelUser'); } catch (e) {}
+
+            // ✅ Login screen वापस दिखाओ
+            const loginScreen = document.getElementById('loginScreen');
+            if (loginScreen) {
+                loginScreen.style.display = 'flex';
+                loginScreen.style.visibility = 'visible';
+                loginScreen.style.opacity = '1';
+                loginScreen.style.pointerEvents = 'auto';
+                loginScreen.removeAttribute('hidden');
+            }
+
+            // ✅ Page reload
             location.reload();
         }
 
         // ---------- CHECK SESSION ON LOAD ----------
+                // ---------- CHECK SESSION ON LOAD (iOS FIXED) ----------
         function checkSession() {
-            const saved = sessionStorage.getItem('adminPanelUser');
-            if (saved) {
+            try {
+                // ✅ sessionStorage या localStorage दोनों try करो (iOS के लिए)
+                let saved = null;
                 try {
-                    const user = JSON.parse(saved);
-                    currentUser = user;
-                    
-                    // Hide login screen
-                    document.getElementById('loginScreen').style.display = 'none';
-                    
-                    // Apply permissions
-                    applyPermissions();
-                    
-                    // Update top bar
-                    const roleBadge = document.getElementById('displayRoleBadge');
-                    roleBadge.textContent = user.role === 'admin' ? '👑 Admin' : '👤 Agent';
-                    roleBadge.className = 'role-badge ' + user.role;
-
-                    document.getElementById('displayUsername').textContent = user.username;
-                    document.getElementById('displayAvatar').textContent = (user.username || 'U').charAt(0).toUpperCase();
-                    
-                    return true;
-                } catch(e) {
-                    console.log('Session error:', e);
+                    saved = sessionStorage.getItem('adminPanelUser');
+                } catch (e) {
+                    console.warn('sessionStorage blocked');
                 }
+
+                if (!saved) {
+                    try {
+                        saved = localStorage.getItem('adminPanelUser');
+                    } catch (e) {
+                        console.warn('localStorage blocked');
+                    }
+                }
+
+                if (saved) {
+                    try {
+                        const user = JSON.parse(saved);
+                        currentUser = user;
+
+                        // ✅ Hide login screen - multiple methods
+                        const loginScreen = document.getElementById('loginScreen');
+                        if (loginScreen) {
+                            loginScreen.style.display = 'none';
+                            loginScreen.style.visibility = 'hidden';
+                            loginScreen.style.opacity = '0';
+                            loginScreen.style.pointerEvents = 'none';
+                            loginScreen.setAttribute('hidden', 'true');
+                        }
+
+                        // ✅ Apply permissions
+                        if (typeof applyPermissions === 'function') applyPermissions();
+
+                        // ✅ Update top bar
+                        const roleBadge = document.getElementById('displayRoleBadge');
+                        if (roleBadge) {
+                            roleBadge.textContent = user.role === 'admin' ? '👑 Admin' : '👤 Agent';
+                            roleBadge.className = 'role-badge ' + user.role;
+                        }
+
+                        const usernameEl = document.getElementById('displayUsername');
+                        if (usernameEl) usernameEl.textContent = user.username;
+
+                        const avatarEl = document.getElementById('displayAvatar');
+                        if (avatarEl) avatarEl.textContent = (user.username || 'U').charAt(0).toUpperCase();
+
+                        return true;
+                    } catch (e) {
+                        console.log('Session parse error:', e);
+                    }
+                }
+            } catch (e) {
+                console.error('checkSession error:', e);
             }
             return false;
         }
